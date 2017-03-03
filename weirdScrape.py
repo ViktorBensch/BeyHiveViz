@@ -1,6 +1,7 @@
-//you need to pip install selenium
-//and also download your preferred browser driver
-//my source https://medium.com/@dawran6/twitter-scraper-tutorial-with-python-requests-beautifulsoup-and-selenium-part-2-b38d849b07fe#.ddh6g4mwd
+#you need to pip install selenium
+#and also download your preferred browser driver
+#my source: 
+#https://medium.com/@dawran6/twitter-scraper-tutorial-with-python-requests-beautifulsoup-and-selenium-part-2-b38d849b07fe#.ddh6g4mwd
 
 import time
 
