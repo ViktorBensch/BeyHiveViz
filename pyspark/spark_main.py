@@ -18,16 +18,23 @@ def unicode_to_string(data, ignore_dicts = False):
     # if it's anything else, return it in its original form
     return data
 
-def main() :
+def main():
+    #necessary to use spark
     conf = SparkConf().setAppName("infoviz")
-
     sc = SparkContext(conf=conf)
         
+    #identify the path of the file
     path = "00.json.bz2"
+    
+    #read the file and load it to an RDD
     my_RDD_strings = sc.textFile(path)
-    #text = sc.wholeTextFiles(path).values.flatMap(lambda x: x.split("\n"))
     my_RDD_dictionaries = my_RDD_strings.map(json.loads).map(lambda x:unicode_to_string(x))
+    
+    #example print to see how things are going
     print my_RDD_dictionaries.take(1)
+    
+    #*********** After this we can easily filter and manipulate the data to include only#
+    #            the info we need                                                                  #
 
 
 if __name__ == '__main__':
