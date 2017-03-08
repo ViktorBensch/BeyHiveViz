@@ -33,6 +33,13 @@ def main():
     #example print to see how things are going
     print my_RDD_dictionaries.take(1)
     
+    #how to reach the location of retweets
+    #for normal tweets ['user']['location']
+    #there might be one more type of json entry (mention)
+    first_five = my_RDD_dictionaries.filter(lambda x: True if x['text'][:2]=="RT" else False)
+    print type(first_five.take(1)[0]['retweeted_status']['user'])
+    print first_five.take(1)[0]['retweeted_status']['user']['location']
+    
     #*********** After this we can easily filter and manipulate the data to include only#
     #            the info we need                                                                  #
 
