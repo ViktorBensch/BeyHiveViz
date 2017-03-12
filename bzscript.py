@@ -1,3 +1,6 @@
+#You only need to install bz2, with pip or not, doesn't matter                                    #    
+#Also don't forget to change the directory named 'root' to the folder's location in your computer #
+
 import sys, os
 import bz2
 import json
