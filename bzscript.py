@@ -32,7 +32,7 @@ def print_f(filename):
     print filename
 
 def analyse_file(filename,minute,hour,day,output):
-    output.write(minute + "/" + hour + "/" + day)
+    output.write(minute + "/" + hour + "/" + day + "\n")
     print minute + "/" + hour + "/" + day
     
     bz_file = bz2.BZ2File(filename)
