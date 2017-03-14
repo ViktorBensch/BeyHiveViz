@@ -1,0 +1,19 @@
+1. install bz2
+
+2. unzip your data
+
+3. go to the location "D:\Misra\archiveteam-twitter-stream-2017-01\archiveteam-twitter-stream-2017-01\01"
+inside you will see the files representing the days of a month. Take them out and put them into two folders
+called "part1" and "part2" (if your CPU is capable of handling it, you can run 3 processes. For this split the 
+files in 3 to also have "part3", then uncomment the lines starting with process3.
+You can try this and see if it works then if not, use 2 processes only).
+So at the end you will have "somelocation\part1\folders_of_first_days\folders_of_hours\files_of_days"
+
+4. go to the script and change the varibale "head" to where your part1 & part2 is 
+(somelocation in the above example)
+
+5. change the variable "output_dir" to where you want to have your output + a foldername. 
+"D:\Misra" is the location + "\output" is the foldername
+
+6. Run on console with python 2.7.
+	"python process_script.py"
