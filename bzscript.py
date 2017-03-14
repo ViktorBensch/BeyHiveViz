@@ -29,6 +29,23 @@ def json_loads_byteified(json_text):
     
 def print_f(filename):
     print filename
+    
+
+###***### if we eliminate the unrelevant sections the size of 5 files = <1.5 KB, time = 20 sec
+def only_relevant(tweet):
+    relevant = {}
+    relevant['screen_name'] = tweet['user']['screen_name']
+    relevant['text'] = tweet['text']
+    relevant['timestamp'] = tweet['timestamp_ms']
+    relevant['following'] = tweet['user']['friends_count']
+    relevant['followers'] = tweet['user']['followers_count']
+    relevant['description'] = tweet['user']['description']
+    relevant['user_location'] = tweet['user']['location']
+    relevant['in_reply_to_screen_name'] = tweet['in_reply_to_screen_name']
+    relevant['user_mentions'] = tweet['entities']['user_mentions']
+    relevant['hashtags'] = tweet['entities']['hashtags']
+    
+    return relevant
 
 def analyse_file(filename,minute,hour,day,output):
     #output.write(minute + "/" + hour + "/" + day + "\n")
@@ -41,19 +58,19 @@ def analyse_file(filename,minute,hour,day,output):
         if tweet.get('text') != None:
             if tweet['lang'] == "en":
                 if "beyonc" in tweet['text'].lower():
-                    json.dump(tweet,output)
+                    json.dump(only_relevant(tweet),output)
                     output.write("\n")
                 elif " bey " in tweet['text'].lower():
-                    json.dump(tweet,output)
+                    json.dump(only_relevant(tweet),output)
                     output.write("\n")
                 elif "sasha fierce" in tweet['text'].lower():
-                    json.dump(tweet,output)
+                    json.dump(only_relevant(tweet),output)
                     output.write("\n")
                 elif "knowles carter" in tweet['text'].lower():
-                    json.dump(tweet,output)
+                    json.dump(only_relevant(tweet),output)
                     output.write("\n")
                 elif "mrs. carter" in tweet['text'].lower():
-                    json.dump(tweet,output)
+                    json.dump(only_relevant(tweet),output)
                     output.write("\n")
          
 
@@ -66,8 +83,11 @@ def main():
     #args = sys.argv[1:]
     
     old_day = "00"
+    old_hour = "aa"
     output_dir = "D:\Misra\output"
     directory = ""
+    output = open("successfull_start.txt", 'w')
+    output.write("Your program was started successfully, good luck! - Nonsensical Giraffes")
     
     for path, subdirs, files in os.walk(root):
         for name in files:
@@ -82,15 +102,24 @@ def main():
                     old_day = day
                     print "New day folder! - " + day
             
-            output_name =  hour + "_" + minute + ".json"
-            output_file_path = os.path.join(directory, output_name).replace("\\","/")
-            output = open(output_file_path, 'w') 
+            ##**!!!**##Creating files for each minute
+            #output_name =  hour + "_" + minute + ".json"
+            #output_file_path = os.path.join(directory, output_name).replace("\\","/")
+            #output = open(output_file_path, 'w') 
+            
+            ##**!!!**##Creating files for each hour
+            if old_hour != hour:
+                output.close()
+                print "New hour file* - " + hour
+                output_name =  hour + ".json"
+                output_file_path = os.path.join(directory, output_name).replace("\\","/")
+                output = open(output_file_path, 'w') 
+                old_hour = hour
             
             input =  path + "/" + name
             
             analyse_file(input.replace("\\","/"),minute,hour,day,output)
             
-            output.close()
             ###***### if we end the script here the size of 5 files = 14 KB, time = 17 sec
             #with open(output_file_path, 'rb') as f_in, gzip.open(output_file_path + '.gz', 'wb') as f_out:
             #    shutil.copyfileobj(f_in, f_out)
@@ -100,6 +129,8 @@ def main():
             
     
     output.close()
+    with open(output_dir, 'rb') as f_in, gzip.open(output_dir + '.gz', 'wb') as f_out:
+        shutil.copyfileobj(f_in, f_out)
 
 
 
