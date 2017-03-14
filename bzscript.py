@@ -1,9 +1,8 @@
-#You only need to install bz2, with pip or not, doesn't matter                                    #    
-#Also don't forget to change the directory named 'root' to the folder's location in your computer #
-
 import sys, os
 import bz2
 import json
+import gzip
+import shutil
 
 def _byteify(data, ignore_dicts = False):
     # if this is a unicode string, return its string representation
@@ -32,7 +31,7 @@ def print_f(filename):
     print filename
 
 def analyse_file(filename,minute,hour,day,output):
-    output.write(minute + "/" + hour + "/" + day + "\n")
+    #output.write(minute + "/" + hour + "/" + day + "\n")
     print minute + "/" + hour + "/" + day
     
     bz_file = bz2.BZ2File(filename)
@@ -66,7 +65,9 @@ def main():
     root = "D:/Misra/archiveteam-twitter-stream-2017-01/archiveteam-twitter-stream-2017-01/01/"
     #args = sys.argv[1:]
     
-    output = open("output.json", 'w') 
+    old_day = "00"
+    output_dir = "D:\Misra\output"
+    directory = ""
     
     for path, subdirs, files in os.walk(root):
         for name in files:
@@ -74,9 +75,28 @@ def main():
             hour = path[-2:]
             day = path[-5:-3]
             
+            if old_day != day:
+                directory = output_dir + "/" + day
+                if not os.path.exists(directory):
+                    os.makedirs(directory)
+                    old_day = day
+                    print "New day folder! - " + day
+            
+            output_name =  hour + "_" + minute + ".json"
+            output_file_path = os.path.join(directory, output_name).replace("\\","/")
+            output = open(output_file_path, 'w') 
+            
             input =  path + "/" + name
             
             analyse_file(input.replace("\\","/"),minute,hour,day,output)
+            
+            output.close()
+            ###***### if we end the script here the size of 5 files = 14 KB, time = 17 sec
+            #with open(output_file_path, 'rb') as f_in, gzip.open(output_file_path + '.gz', 'wb') as f_out:
+            #    shutil.copyfileobj(f_in, f_out)
+            ###***### if we end the script here the size of 5 files = 23 KB, time = 28 sec
+            #os.remove(output_file_path)
+            ###***### if we end the script here the size of 5 files = 3 KB, time = 28 sec
             
     
     output.close()
