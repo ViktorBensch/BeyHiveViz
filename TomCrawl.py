@@ -22,7 +22,8 @@ def search():
  
 	MAX_ATTEMPTS                    =   100
 	COUNT_OF_TWEETS_TO_BE_FETCHED   =   1100
-	search_query                    =   "Koala"
+	search_query                    =   "Beyonce"
+	
 	
 	for i in range(0,MAX_ATTEMPTS):
 	    print i
@@ -68,7 +69,7 @@ def main():
      
 	tweets, query = search()
 	print 'Search complete'
-	
+	print len(tweets)
 	title = 'TomCSV' +'_'+ query + '_'+ str(datetime.datetime.now()) +'.csv'
 	#Output JSON instead
 	with open(title, 'w') as csvfile:
