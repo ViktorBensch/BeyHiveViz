@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <meta charset="utf-8">
+
+        <style>
+
+            .axis path,
+            .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+            }
+
+            .axis text {
+                font-family: sans-serif;
+                font-size: 11px;
+            }
+            .title {
+              font: 300 38px Helvetica Neue;
+              fill: #666;
+            }
+        </style>
+        <title>D3 Test</title>
+        <script type="text/javascript" src="d3/d3.v3.js"></script>
+
+    </head>
+    <body>
+
+        <script type="text/javascript">
+            // Your beautiful D3 code will go here
+
+            d3.json("6days.json", function(error, data)
+            { //ALL code using the data here
+                var w = 800;
+                var h = 800;
+                var words = ["A","B","C","D","E","F","G","H","I","J"];
+                var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", w)
+                    .attr("height", h);
+                    
+                var word = svg.append("word")
+                    .attr("class","title")
+                    .attr("y", 230)
+                    .attr("x", 240)
+                    .text("Bey");
+                
+               	mapWords(words,w,h);  
+				
+				//Place the top words in the correct location on the svg
+				function mapWords(words,w,h){
+					console.log(Math.min(1,2,3));
+					var padding = 50;
+					cx = w/2;
+					cy = h/2;
+					radius = Math.min(cx,cy) - padding;
+					
+					svg.selectAll("text")
+		                .data(words)
+		                .enter()
+		                .append("text")
+		                .text(function(d) {
+		                    return d;
+		                })
+		                .attr("x", function(d, i) {
+		                    return cx + radius*Math.cos(i/words.length*Math.PI*2);
+		                })
+		                .attr("y", function(d,i) {
+		                    return cy + radius*Math.sin(i/words.length*Math.PI*2);
+		                })
+
+				}
+
+});
+        </script>
+            
+    </body>
+</html>  
