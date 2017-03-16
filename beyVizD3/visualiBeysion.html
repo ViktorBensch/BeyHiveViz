@@ -29,34 +29,69 @@
     <body>
 
         <script type="text/javascript">
-            // Your beautiful D3 code will go here
-
-            d3.json("6days.json", function(error, data)
+					   
+            d3.text("whole_month.txt", function(data)
             { //ALL code using the data here
                 var w = 800;
                 var h = 800;
-                var words = ["A","B","C","D","E","F","G","H","I","J"];
                 var svg = d3.select("body")
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h);
-                    
-                var word = svg.append("word")
-                    .attr("class","title")
-                    .attr("y", 230)
-                    .attr("x", 240)
-                    .text("Bey");
+                var topWords = getWords();
+                var topUsers = getUsers();
+                var topRelations = getRelations();
                 
-               	mapWords(words,w,h);  
+               	mapWords(topWords,w,h);
+               	var userLocations = mapUsers(topWords,topUsers,w,h);
+               	//mapRelations(topRelations,userLocations);
+               	
+               	
+               	//Analyse the dataset and returns the most used words
+				function getWords(){
+					//EXTRACT FRO DATAFILE!!	
+					
+					//This is just a toy example	
+					return ["A","B","C"];
+				}
+
+				function getUsers(){
+					//EXTRACT FROM DATAFILE!!
+					
+					//This is just a toy example
+					return [ ["anne", "abel", "arend",'annemies','anja'], ["bert", "bonno"], ["carl","cato",'catelijn']];
+					}
 				
-				//Place the top words in the correct location on the svg
+				function getRelations(){
+					//EXTRACT FROM DATAFILE!!
+					
+					return [['annemies','anja']]//,['anne','catelijn'], ,['bert','anne'], ['bonno','cato'] ];
+				}
+				
+				//Add title in center
+				var word = svg.append("text")
+                    .attr("class","title")
+                    .attr("y", h/2)
+                    .attr("x", w/2 - 30)
+                    .text("Bey");
+                    
+                //My useless little test point
+                var point = svg.append("circle")
+                	.attr("cx",300)
+                	.attr("cy",300)
+                	.attr("r",5)
+                	.attr("user",'Stranger')
+                	.attr("Tag",'None')
+                	.attr("fill","red");
+                	
+          	
+				
+				//Place the top words in the correct location in the svg
 				function mapWords(words,w,h){
-					console.log(Math.min(1,2,3));
 					var padding = 50;
 					cx = w/2;
 					cy = h/2;
-					radius = Math.min(cx,cy) - padding;
-					
+					radius = Math.min(cx,cy) - padding;		
 					svg.selectAll("text")
 		                .data(words)
 		                .enter()
@@ -70,9 +105,71 @@
 		                .attr("y", function(d,i) {
 		                    return cy + radius*Math.sin(i/words.length*Math.PI*2);
 		                })
+				}
+				//Place the users in the correcct location in the svg
+				function mapUsers(words,users, w,h){
+					var userDict = {};
+					var padding = 50;
+					cx = w/2;
+					cy = h/2;
+					radius = Math.min(cx,cy) - padding;
+					
+					for (i=0; i<users.length; i++){
+						wordX = cx + radius*Math.cos(i/words.length*Math.PI*2) +5; //+5 and
+						wordY = cy + radius*Math.sin(i/words.length*Math.PI*2) -5; //-5 added to compensate for Word length
+						for (j= 0; j<users[i].length;j++){
+
+							//console.log('Word',words[i],"Users",users[i][j],'i',i,'j',j);
+							//console.log(users.length)
+							svg.append("circle")
+				        		.attr("cx", wordX + 40*Math.cos(j/users[i].length*Math.PI*2) )
+				        		.attr("cy", wordY + 40*Math.sin(j/users[i].length*Math.PI*2) )
+				        		.attr("r",5)
+				        		.attr("Word",words[i])
+				        		.attr("User",users[i][j])
+				        		.attr("fill","lime");
+				        		
+				        	userX = wordX + 40*Math.cos(j/users[i].length*Math.PI*2);
+				        	userY = wordY + 40*Math.sin(j/users[i].length*Math.PI*2);
+				        	userDict[users[i][j]] = [userX,userY];
+
+				        			
+						}
+					}
+					
+				}
+				
+				//Places the relationship lines between the correct points
+				function mapRelations(relations,users){
+					u = users;
+					console.log(users);
+					svg.selectAll('line')
+						.data(relations)
+						.enter()
+						.append('line')
+		            	.attr('x1',function(d, i,users) {
+							console.log('x1', d,i,users);
+							//from 1rst person in relationship take 1st (x) coord
+		                    return users[d[0]][0]
+		                })
+		            	.attr('x2',function(d, i) {
+
+		                    return users[d[1]][0]
+		                })
+		            	.attr('y1',function(d, i) {
+
+		                    return users[d[0]][1]
+		                })
+		            	.attr('y2',function(d, i) {
+
+		                    return users[d[1]][1]
+		                })
+		            	.attr('stroke', 'green')
+		            	.attr('stroke-width',5); 						
+					
+
 
 				}
-
 });
         </script>
             
