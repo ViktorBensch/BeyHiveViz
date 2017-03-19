@@ -38,18 +38,19 @@
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h);
+
                 var topWords = getWords();
                 var topUsers = getUsers();
                 var topRelations = getRelations();
                 
                	mapWords(topWords,w,h);
-               	var userLocations = mapUsers(topWords,topUsers,w,h);
-               	//mapRelations(topRelations,userLocations);
+               	userLocations = mapUsers(topWords,topUsers,w,h);
+               	mapRelations(topRelations,userLocations);
                	
                	
                	//Analyse the dataset and returns the most used words
 				function getWords(){
-					//EXTRACT FRO DATAFILE!!	
+					//EXTRACT FROM DATAFILE!!	
 					
 					//This is just a toy example	
 					return ["A","B","C"];
@@ -59,13 +60,15 @@
 					//EXTRACT FROM DATAFILE!!
 					
 					//This is just a toy example
-					return [ ["anne", "abel", "arend",'annemies','anja'], ["bert", "bonno"], ["carl","cato",'catelijn']];
+					return [ ["anne", "abel", "arend",'annemies','anja'], 
+					["bert", "bonno"], ["carl","cato",'catelijn']];
 					}
 				
 				function getRelations(){
 					//EXTRACT FROM DATAFILE!!
 					
-					return [['annemies','anja']]//,['anne','catelijn'], ,['bert','anne'], ['bonno','cato'] ];
+					return [['annemies','anja'],['anne','catelijn'],
+					['bert','anne'], ['bonno','cato'] ];
 				}
 				
 				//Add title in center
@@ -84,7 +87,6 @@
                 	.attr("Tag",'None')
                 	.attr("fill","red");
                 	
-          	
 				
 				//Place the top words in the correct location in the svg
 				function mapWords(words,w,h){
@@ -115,8 +117,8 @@
 					radius = Math.min(cx,cy) - padding;
 					
 					for (i=0; i<users.length; i++){
-						wordX = cx + radius*Math.cos(i/words.length*Math.PI*2) +5; //+5 and
-						wordY = cy + radius*Math.sin(i/words.length*Math.PI*2) -5; //-5 added to compensate for Word length
+						wordX = cx + radius*Math.cos(i/words.length*Math.PI*2)+5; //+5 and
+						wordY = cy + radius*Math.sin(i/words.length*Math.PI*2)-5; //-5 added to compensate for Word length
 						for (j= 0; j<users[i].length;j++){
 
 							//console.log('Word',words[i],"Users",users[i][j],'i',i,'j',j);
@@ -136,36 +138,34 @@
 				        			
 						}
 					}
-					
+					return userDict
 				}
 				
 				//Places the relationship lines between the correct points
-				function mapRelations(relations,users){
-					u = users;
-					console.log(users);
+				function mapRelations(relations,userLocations){
 					svg.selectAll('line')
 						.data(relations)
 						.enter()
 						.append('line')
-		            	.attr('x1',function(d, i,users) {
-							console.log('x1', d,i,users);
+		            	.attr('x1',function(d, i) {
 							//from 1rst person in relationship take 1st (x) coord
-		                    return users[d[0]][0]
+		                    return userLocations[d[0]][0]
 		                })
 		            	.attr('x2',function(d, i) {
 
-		                    return users[d[1]][0]
+		                    return userLocations[d[1]][0]
 		                })
 		            	.attr('y1',function(d, i) {
 
-		                    return users[d[0]][1]
+		                    return userLocations[d[0]][1]
 		                })
 		            	.attr('y2',function(d, i) {
 
-		                    return users[d[1]][1]
+		                    return userLocations[d[1]][1]
 		                })
-		            	.attr('stroke', 'green')
-		            	.attr('stroke-width',5); 						
+		            	.attr('stroke', 'grey')
+		            	.attr('opacity',0.2)
+		            	.attr('stroke-width',3); 						
 					
 
 
