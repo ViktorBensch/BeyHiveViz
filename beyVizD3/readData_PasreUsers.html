@@ -53,6 +53,46 @@
             };      
             
             
+            var final_data = []
+            related_arr = []
+            for(var i = 0; i<group_of_users.length; i++)
+            {
+                final_data.push({
+                    screen_name: group_of_users[i][0]['screen_name'],
+                    location: group_of_users[i][0]['user_location'],
+                    followers: group_of_users[i][0]['followers'],
+                    following: group_of_users[i][0]['following'],
+                    tweet_count: group_of_users[i].length, 
+                    tweets: [],
+                    related_users: []
+                });
+                for(var j = 0; j<group_of_users[i].length; j++){
+                    final_data[i]['tweets'].push({
+                        text: group_of_users[i][j]['text'],
+                        timestamp: group_of_users[i][j]['timestamp'],
+                        hashtags: group_of_users[i][j]['hashtags']
+                    });
+                    final_data[i]['related_users'].push(group_of_users[i][j]['in_reply_to_screen_name']);
+                    //related_arr.push(group_of_users[i][j]['in_reply_to_screen_name']);
+                }
+                /*for(var k = 0; k<related_arr.length; k++){
+                    var current = related_arr[k];
+                    related_arr.splice(k,1);
+                    var count = 0;
+                    for(var p = k; p<related_arr.length; p++){
+                        var next = related_arr[p];
+                        if(current = next)
+                        {
+                            related_arr.splice(p,1);
+                            count++;
+                        }
+                    }
+                    final_data[i]['related_users'].push((current,count));
+                }*/
+            }
+            
+            group_of_users = []
+            
             //We only have people with more than 10.000 followers.
             //Data structure is: group_of_users[a][b]['something']
             //       a: index of the user
