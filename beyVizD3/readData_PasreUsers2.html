@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>User Classification</title>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
+		<script type="text/javascript" src="d3/d3.v3.js"></script>
+        <style type="text/css">
+
+		</style>
+    </head>
+    <body>
+        <script type="text/javascript">
+        
+        //Width and height
+        var w_canvas = 800;
+        var h_canvas = 400;
+        
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", w_canvas)
+            .attr("height", h_canvas);
+            
+		
+        d3.text("DEC_whole_month.txt", function(data) {
+        
+            var array = data.split("\n");
+			var listOfUsers = [];
+            
+            var json_array = []
+            for (var i = 0; i < array.length-1; i++) { 
+                json_array.push(JSON.parse(array[i]));
+            }
+            data = ""
+            array = [];
+            
+            grouped = {};
+
+            for (var i = 0; i < json_array.length; i++) { 
+                grouped[json_array[i].screen_name] = grouped[json_array[i].screen_name] || [];
+                grouped[json_array[i].screen_name].push(json_array[i]);
+            };
+            
+            var group_of_users = Object.keys(grouped).map(function(k) { return grouped[k] });
+                        
+            console.log(group_of_users.length);
+            for (var i = 0; i < group_of_users.length;) { 
+                    if(group_of_users[i][0]['followers']<10000)
+                    {
+                        group_of_users.splice(i,1);
+                    }
+                    else
+                    {
+						listOfUsers.push(group_of_users[i][0]['screen_name']);
+                        i++;
+                    }
+            };      
+            
+			//*****************
+			//create  relations
+			//*****************
+			
+			for (var i = 0; i < group_of_users.length;i++) { 
+			//cycle through users
+				group_of_users[i][0]['related_users'] = [];
+				//define popularity for size of the nodes
+				group_of_users[i][0]['popularity'] = group_of_users[i][0]['friends_count']+group_of_users[i][0]['followers_count'];
+	
+				for(var j=0; j<group_of_users[i].length; j++){
+				//cycle through tweets
+					var mentionedUser = listOfUsers.indexOf(group_of_users[i][j]['in_reply_to_screen_name']);
+						
+						if (mentionedUser != -1){
+							group_of_users[i][0]['related_users'].push(mentionedUser);
+						}
+					for(var k=0; k<group_of_users[i][j]['user_mentions'].length; k++){
+					//cycle through mentions
+						var mentionedUser = listOfUsers.indexOf(group_of_users[i][j]['user_mentions'][k]['screen_name']);
+						
+						if (mentionedUser != -1){
+							group_of_users[i][0]['related_users'].push(mentionedUser);
+						}
+						
+					}
+				}
+				var count_rel = [,]
+				for(var j=0; j<group_of_users[i][0]['related_users'].length; j++){
+					
+				}
+			};
+			
+            
+            var final_data = []
+            related_arr = []
+            for(var i = 0; i<group_of_users.length; i++)
+            {
+                final_data.push({
+                    screen_name: group_of_users[i][0]['screen_name'],
+                    location: group_of_users[i][0]['user_location'],
+                    followers: group_of_users[i][0]['followers'],
+                    following: group_of_users[i][0]['following'],
+                    tweet_count: group_of_users[i].length, 
+                    tweets: [],
+                    related_users: group_of_users[i][0]['related_users']
+                });
+                for(var j = 0; j<group_of_users[i].length; j++){
+                    final_data[i]['tweets'].push({
+                        text: group_of_users[i][j]['text'],
+                        timestamp: group_of_users[i][j]['timestamp'],
+                        hashtags: group_of_users[i][j]['hashtags']
+                    });
+                    //final_data[i]['related_users'].push(group_of_users[i][j]['in_reply_to_screen_name']);
+                    //related_arr.push(group_of_users[i][j]['in_reply_to_screen_name']);
+                }
+                /*for(var k = 0; k<related_arr.length; k++){
+                    var current = related_arr[k];
+                    related_arr.splice(k,1);
+                    var count = 0;
+                    for(var p = k; p<related_arr.length; p++){
+                        var next = related_arr[p];
+                        if(current = next)
+                        {
+                            related_arr.splice(p,1);
+                            count++;
+                        }
+                    }
+                    final_data[i]['related_users'].push((current,count));
+                }*/
+            }
+            
+            group_of_users = []
+            
+            //We only have people with more than 10.000 followers.
+            //Data structure is: group_of_users[a][b]['something']
+            //       a: index of the user
+            //       b:index of a tweet of that user
+            //       'something': an attribute of the tweet object
+            //ex1: in order to get the text of a tweet you should do group_of_users[a][b]['text']
+            //ex2: to get the mentioned users group_of_users[a][0]['user_mentions']
+            
+            // TO BE CONTINUED...
+            /*for (var i = 0; i < group_of_users.length;i++) { 
+                group_of_users[i][0]['related_users'] = [];
+                for(var j=0; j<group_of_users[i][0]['user_mentions'].length; j++){
+                    //use this line to include Retweet to mentioned user list
+                    group_of_users[i][0]['mentioned_users'].push(group_of_users[i][0]['user_mentions'][j]['screen_name']);
+                }
+            };  */  
+            //******************************//
+            
+            console.log(group_of_users.length);
+			console.log(final_data);
+			
+			
+			
+            console.log("finished");
+            
+        });
+   
+        </script>
+        
+    </body>
+</html>
