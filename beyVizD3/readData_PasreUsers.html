@@ -55,35 +55,6 @@
                         i++;
                     }
             };      
-            
-			//*****************
-			//create  relations
-			//*****************
-			
-			for (var i = 0; i < group_of_users.length;i++) { 
-			//cycle through users
-				group_of_users[i][0]['related_users'] = [];
-				//define popularity for size of the nodes
-				group_of_users[i][0]['popularity'] = group_of_users[i][0]['friends_count']+group_of_users[i][0]['followers_count'];
-	
-				for(var j=0; j<group_of_users[i].length; j++){
-				//cycle through tweets
-					var mentionedUser = listOfUsers.indexOf(group_of_users[i][j]['in_reply_to_screen_name']);
-						
-						if (mentionedUser != -1){
-							group_of_users[i][0]['related_users'].push(mentionedUser);
-						}
-					for(var k=0; k<group_of_users[i][j]['user_mentions'].length; k++){
-					//cycle through mentions
-						var mentionedUser = listOfUsers.indexOf(group_of_users[i][j]['user_mentions'][k]['screen_name']);
-						
-						if (mentionedUser != -1){
-							group_of_users[i][0]['related_users'].push(mentionedUser);
-						}
-						
-					}
-				}
-			};
 			
             
             var final_data = []
@@ -97,13 +68,15 @@
                     following: group_of_users[i][0]['following'],
                     tweet_count: group_of_users[i].length, 
                     tweets: [],
-                    related_users: group_of_users[i][0]['related_users']
+                    related_users: []
                 });
                 for(var j = 0; j<group_of_users[i].length; j++){
                     final_data[i]['tweets'].push({
                         text: group_of_users[i][j]['text'],
                         timestamp: group_of_users[i][j]['timestamp'],
-                        hashtags: group_of_users[i][j]['hashtags']
+                        hashtags: group_of_users[i][j]['hashtags'],
+						user_mentions: group_of_users[i][j]['user_mentions'],
+						in_reply_to_screen_name: group_of_users[i][j]['in_reply_to_screen_name']
                     });
                     //final_data[i]['related_users'].push(group_of_users[i][j]['in_reply_to_screen_name']);
                     //related_arr.push(group_of_users[i][j]['in_reply_to_screen_name']);
@@ -145,10 +118,36 @@
             //******************************//
             
             console.log(group_of_users.length);
+			
+			
+			//*****************
+			//create  relations
+			//*****************
+			
+			for (var i = 0; i < final_data.length;i++) { 
+			//cycle through users
+				//define popularity for size of the nodes
+				final_data[i]['popularity'] = final_data[i]['following']+final_data[i]['followers'];
+	
+				for(var j=0; j<final_data[i]['tweets'].length; j++){
+				//cycle through tweets
+					var mentionedUser = listOfUsers.indexOf(final_data[i]['tweets'][j]['in_reply_to_screen_name']);
+					if (mentionedUser != -1){ 
+						final_data[i]['related_users'].push(mentionedUser);
+					}
+					for(var k=0; k<final_data[i]['tweets'][j]['user_mentions'].length; k++){
+					//cycle through mentions
+                        if(final_data[i]['tweets'][j]['user_mentions'][k] != 0){
+                            var mentionedUser = listOfUsers.indexOf(final_data[i]['tweets'][j]['user_mentions'][k]['screen_name']);
+                            
+                            if (mentionedUser != -1){
+                                final_data[i]['related_users'].push(mentionedUser);
+                            }
+                        }
+					}
+				}
+			};
 			console.log(final_data);
-			
-			
-			
             console.log("finished");
             
         });
