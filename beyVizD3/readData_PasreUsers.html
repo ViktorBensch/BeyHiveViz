@@ -100,24 +100,9 @@
             group_of_users = []
             
             //We only have people with more than 10.000 followers.
-            //Data structure is: group_of_users[a][b]['something']
-            //       a: index of the user
-            //       b:index of a tweet of that user
-            //       'something': an attribute of the tweet object
-            //ex1: in order to get the text of a tweet you should do group_of_users[a][b]['text']
-            //ex2: to get the mentioned users group_of_users[a][0]['user_mentions']
-            
-            // TO BE CONTINUED...
-            /*for (var i = 0; i < group_of_users.length;i++) { 
-                group_of_users[i][0]['related_users'] = [];
-                for(var j=0; j<group_of_users[i][0]['user_mentions'].length; j++){
-                    //use this line to include Retweet to mentioned user list
-                    group_of_users[i][0]['mentioned_users'].push(group_of_users[i][0]['user_mentions'][j]['screen_name']);
-                }
-            };  */  
             //******************************//
             
-            console.log(group_of_users.length);
+            console.log(final_data.length);
 			
 			
 			//*****************
@@ -147,7 +132,7 @@
 					}
 				}
 			};
-			console.log(final_data);
+			//console.log(final_data);
             console.log("finished");
             
         });
