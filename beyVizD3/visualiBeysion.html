@@ -30,67 +30,127 @@
 
         <script type="text/javascript">
 					   
-            d3.text("whole_month.txt", function(data)
-            { //ALL code using the data here
+            d3.json("whole_month.json", function(root){ 
+            //ALL code using the data here
+            	//console.log(root)
                 var w = 800;
                 var h = 800;
+
+                //EXAMPLE OF THE TOTAL DATA, IS THIS STRUCTURE ACCURATE???
+                var data = {
+                	10: {'words': 
+                			["A","B","C"], 
+                		'users':
+                			[["anne", "abel", "arend",'annemies','anja'], ["bert", "bonno","bill","bob"], ["carl","cato",'catelijn',"christina"]],
+                		'relations': 
+                			[['annemies','anja'],['anne','catelijn'],['bert','anne'], ['bonno','cato'] ]
+                		},
+                	11: {
+                		'words': 
+                			["F","G","H"], 
+                		'users':
+                			[['fred','fillipa','florence'], ['gerta','gilly','gerold','geoffry','gina'], ['harry','henry','holly','hildegard']],
+                		'relations': 
+                			[['fred','harry'],['fillipa','florence'],['holly','gilly'], ['holly','gina'] ]
+                	}
+                };
+                var month = 10
+                var tooltip = d3.select("body")
+					.append("div")
+					.style("position", "absolute")
+					.style("z-index", "10")
+					.style("visibility", "hidden")
+					.text("a simple tooltip");
+
                 var svg = d3.select("body")
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h);
 
-                var topWords = getWords();
-                var topUsers = getUsers();
-                var topRelations = getRelations();
-                
+                //Get the data subsets
+                var topWords = getWords(data,month);
+                var topUsers = getUsers(data,month);
+                var topRelations = getRelations(data,month);
+                //Map the data onto the visualization
                	mapWords(topWords,w,h);
-               	userLocations = mapUsers(topWords,topUsers,w,h);
-               	mapRelations(topRelations,userLocations);
-               	
-               	
+               	[userLocations, usersIndexed] = mapUsers(topWords,topUsers,w,h);
+               	createCircles(userLocations);
+               	mapRelations(topRelations,usersIndexed);
+
+               	restElems();
+
+                //Describe actions click event
+                window.focus();
+                d3.select(window).on("keydown", function() {
+                    switch (d3.event.keyCode) {
+                      case 37: month -= 1; break;
+                      case 39: month += 1; break;
+                    }
+                    update(data,month);
+                }); 
+
+
+
                	//Analyse the dataset and returns the most used words
-				function getWords(){
-					//EXTRACT FROM DATAFILE!!	
-					
+				function getWords(data,month){
+					//EXTRACT FROM DATAFILE!!
+
+					return data[month].words
 					//This is just a toy example	
-					return ["A","B","C"];
+					/*return ["A","B","C"];*/
 				}
 
-				function getUsers(){
+				function getUsers(data,month){
 					//EXTRACT FROM DATAFILE!!
 					
+					return data[month].users
 					//This is just a toy example
-					return [ ["anne", "abel", "arend",'annemies','anja'], 
-					["bert", "bonno"], ["carl","cato",'catelijn']];
+					/*
+					return [["anne", "abel", "arend",'annemies','anja'], 
+					["bert", "bonno","bill","bob"], ["carl","cato",'catelijn',"christina"]];*/
 					}
 				
-				function getRelations(){
+				function getRelations(data,month){
 					//EXTRACT FROM DATAFILE!!
 					
+					return data[month].relations
+					/*
+					//This is just a toy example
 					return [['annemies','anja'],['anne','catelijn'],
-					['bert','anne'], ['bonno','cato'] ];
+					['bert','anne'], ['bonno','cato'] ]*/;
 				}
 				
-				//Add title in center
-				var word = svg.append("text")
-                    .attr("class","title")
-                    .attr("y", h/2)
-                    .attr("x", w/2 - 30)
-                    .text("Bey");
-                    
-                //My useless little test point
-                var point = svg.append("circle")
-                	.attr("cx",300)
-                	.attr("cy",300)
-                	.attr("r",5)
-                	.attr("user",'Stranger')
-                	.attr("Tag",'None')
-                	.attr("fill","red");
-                	
+				function restElems(){
+					//Add title in center
+					var word = svg.append("text")
+	                    .attr("class","title")
+	                    .attr("y", h/2)
+	                    .attr("x", w/2 - 30)
+	                    .text("Bey");
+	                    
+	                //My first useless little test point
+	                var point1 = svg.append("circle")
+	                	.attr("cx",300)
+	                	.attr("cy",300)
+	                	.attr("r",5)
+	                	.attr("user",'Stranger')
+	                	.attr("Tag",'None')
+	                	.attr("fill","red");
+	                	
+	                //My second useless little test point
+	                var point2 = svg.append("circle")
+	                	.attr("cx",500)
+	                	.attr("cy",500)
+	                	.attr("r",5)
+	                	.attr("user",'Loner')
+	                	.attr("Tag",'None')
+	                	.attr("fill","purple");		
+				}
+
 				
 				//Place the top words in the correct location in the svg
 				function mapWords(words,w,h){
-					var padding = 50;
+					var padding = 100;
 					cx = w/2;
 					cy = h/2;
 					radius = Math.min(cx,cy) - padding;		
@@ -110,37 +170,64 @@
 				}
 				//Place the users in the correcct location in the svg
 				function mapUsers(words,users, w,h){
-					var userDict = {};
-					var padding = 50;
+					var userDict = [];
+					var userIndexDict = {};
+					var padding = 100;
 					cx = w/2;
 					cy = h/2;
 					radius = Math.min(cx,cy) - padding;
-					
+
 					for (i=0; i<users.length; i++){
 						wordX = cx + radius*Math.cos(i/words.length*Math.PI*2)+5; //+5 and
 						wordY = cy + radius*Math.sin(i/words.length*Math.PI*2)-5; //-5 added to compensate for Word length
 						for (j= 0; j<users[i].length;j++){
-
-							//console.log('Word',words[i],"Users",users[i][j],'i',i,'j',j);
-							//console.log(users.length)
-							svg.append("circle")
-				        		.attr("cx", wordX + 40*Math.cos(j/users[i].length*Math.PI*2) )
-				        		.attr("cy", wordY + 40*Math.sin(j/users[i].length*Math.PI*2) )
-				        		.attr("r",5)
-				        		.attr("Word",words[i])
-				        		.attr("User",users[i][j])
-				        		.attr("fill","lime");
-				        		
+							circleX = wordX + 40*Math.cos(j/users[i].length*Math.PI*2);
+							circleY = wordY + 40*Math.sin(j/users[i].length*Math.PI*2);
 				        	userX = wordX + 40*Math.cos(j/users[i].length*Math.PI*2);
 				        	userY = wordY + 40*Math.sin(j/users[i].length*Math.PI*2);
-				        	userDict[users[i][j]] = [userX,userY];
-
-				        			
+				        	//userDict[users[i][j]] = [userX,userY];
+				        	smallDict = {};
+				        	smallDict['name'] = users[i][j];
+				        	smallDict['x'] =  userX;
+				        	smallDict['y'] =  userY;
+				        	userDict.push(smallDict);
+				        	userIndexDict[users[i][j]] = {'x': userX,'y': userY}
 						}
 					}
-					return userDict
+					return [userDict, userIndexDict];
 				}
 				
+				//Places circles on the svg
+				function createCircles(dataset){
+               		svg.selectAll("circle")
+	               		.data(dataset)
+	               		.enter()
+	               		.append("svg:circle")
+			            .attr("cx", function(d) {return d.x;})
+						.attr("cy", function(d) {return d.y;})
+						.attr("fill", "lime")
+						.attr("r", 10)
+						//Adds notification on mouseover
+						.on("mouseover", function(d){
+							var xPos = parseFloat(d3.select(this).attr("cx"));
+							var yPos = parseFloat(d3.select(this).attr("cy"));
+							svg.append("text")
+								  .attr("id", "tooltip")
+								  .attr("x", xPos)
+								  .attr("y", yPos)
+								  .attr("text-anchor", "middle")
+								  .attr("font-family", "sans-serif")
+								  .attr("font-size", "11px")
+								  .attr("font-weight", "bold")
+								  .attr("fill", "black")
+								  .text(d.name);
+						})
+						.on("mouseout", function() {
+							//Remove the tooltip
+							d3.select("#tooltip").remove();
+						})
+				}
+
 				//Places the relationship lines between the correct points
 				function mapRelations(relations,userLocations){
 					svg.selectAll('line')
@@ -149,26 +236,51 @@
 						.append('line')
 		            	.attr('x1',function(d, i) {
 							//from 1rst person in relationship take 1st (x) coord
-		                    return userLocations[d[0]][0]
+		                    return userLocations[d[0]].x
 		                })
 		            	.attr('x2',function(d, i) {
 
-		                    return userLocations[d[1]][0]
+		                    return userLocations[d[1]].x
 		                })
 		            	.attr('y1',function(d, i) {
 
-		                    return userLocations[d[0]][1]
+		                    return userLocations[d[0]].y
 		                })
 		            	.attr('y2',function(d, i) {
 
-		                    return userLocations[d[1]][1]
+		                    return userLocations[d[1]].y
 		                })
 		            	.attr('stroke', 'grey')
 		            	.attr('opacity',0.2)
 		            	.attr('stroke-width',3); 						
-					
+				}
 
+				function update(data,month){
+					console.log('Update',month, Object.keys(data))
+					//Range of data hard-coded. ALTER LATER!!
+					if(month > 11){
+						console.log('Nope')
+					}
+					else if ( month< 10){
+						console.log('Nope')
+					}
+					else{
+	                    //Remove old elements
+	                    svg.selectAll('text').remove();
+	                    svg.selectAll('circle').remove();
+	                    svg.selectAll('line').remove();
 
+						var topWords = getWords(data,month);
+		                var topUsers = getUsers(data,month);
+		                var topRelations = getRelations(data,month);
+		                
+		               	mapWords(topWords,w,h);
+		               	[userLocations, usersIndexed] = mapUsers(topWords,topUsers,w,h);
+		               	createCircles(userLocations);
+		               	mapRelations(topRelations,usersIndexed);
+
+		               	restElems;						
+					}
 				}
 });
         </script>
