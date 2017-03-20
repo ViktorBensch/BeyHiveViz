@@ -4,11 +4,13 @@
         <meta charset="utf-8">
         <title>User Classification</title>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
+		<script type="text/javascript" src="d3/d3.v3.js"></script>
         <style type="text/css">
 
 		</style>
     </head>
     <body>
+	<script src='functions_viktor.js'></script>
         <script type="text/javascript">
         
         //Width and height
@@ -20,9 +22,11 @@
             .attr("width", w_canvas)
             .attr("height", h_canvas);
             
-        d3.text("jan_whole_month.txt", function(data) {
+		
+        d3.text("DEC_whole_month.txt", function(data) {
         
             var array = data.split("\n");
+			var listOfUsers = [];
             
             var json_array = []
             for (var i = 0; i < array.length-1; i++) { 
@@ -48,6 +52,7 @@
                     }
                     else
                     {
+						listOfUsers.push(group_of_users[i][0]['screen_name']);
                         i++;
                     }
             };      
@@ -72,6 +77,25 @@
             //******************************//
             
             console.log(group_of_users.length);
+			
+			for (var i = 0; i < group_of_users.length;i++) { 
+			//cycle through users
+				group_of_users[i][0]['related_users'] = [];
+				//define popularity for size of the nodes
+				group_of_users[i][0]['popularity'] = group_of_users[i][0]['friends_count']+group_of_users[i][0]['followers_count'];
+	
+				for(var j=0; j<group_of_users[i].length; j++){
+				//cycle through tweets
+					for(var k=0; k<group_of_users[i][j]['user_mentions'].length; k++){
+					//cycle through mentions
+						var mentionedUser = listOfUsers.indexOf(group_of_users[i][j]['user_mentions'][k]['screen_name']);
+						
+						if (mentionedUser != -1){
+							group_of_users[i][0]['related_users'].push(mentionedUser);
+						}
+					}
+				}
+			};
             console.log("finished");
             
         });
