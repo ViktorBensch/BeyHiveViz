@@ -68,6 +68,11 @@
 	
 				for(var j=0; j<group_of_users[i].length; j++){
 				//cycle through tweets
+					var mentionedUser = listOfUsers.indexOf(group_of_users[i][j]['in_reply_to_screen_name']);
+						
+						if (mentionedUser != -1){
+							group_of_users[i][0]['related_users'].push(mentionedUser);
+						}
 					for(var k=0; k<group_of_users[i][j]['user_mentions'].length; k++){
 					//cycle through mentions
 						var mentionedUser = listOfUsers.indexOf(group_of_users[i][j]['user_mentions'][k]['screen_name']);
@@ -75,6 +80,7 @@
 						if (mentionedUser != -1){
 							group_of_users[i][0]['related_users'].push(mentionedUser);
 						}
+						
 					}
 				}
 			};
@@ -139,6 +145,8 @@
             //******************************//
             
             console.log(group_of_users.length);
+			console.log(final_data);
+			
 			
 			
             console.log("finished");
