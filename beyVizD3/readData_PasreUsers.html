@@ -75,9 +75,9 @@
                     final_data[i]['tweets'].push({
                         text: group_of_users[i][j]['text'],
                         timestamp: group_of_users[i][j]['timestamp'],
-                        hashtags: group_of_users[i][j]['hashtags']
+                        hashtags: group_of_users[i][j]['hashtags'],
+                        user_mentions: group_of_users[i][j]['user_mentions']
                     });
-                    final_data[i]['related_users'].push(group_of_users[i][j]['in_reply_to_screen_name']);
                     //related_arr.push(group_of_users[i][j]['in_reply_to_screen_name']);
                 }
                 /*for(var k = 0; k<related_arr.length; k++){
@@ -99,40 +99,25 @@
             group_of_users = []
             
             //We only have people with more than 10.000 followers.
-            //Data structure is: group_of_users[a][b]['something']
-            //       a: index of the user
-            //       b:index of a tweet of that user
-            //       'something': an attribute of the tweet object
-            //ex1: in order to get the text of a tweet you should do group_of_users[a][b]['text']
-            //ex2: to get the mentioned users group_of_users[a][0]['user_mentions']
             
-            // TO BE CONTINUED...
-            /*for (var i = 0; i < group_of_users.length;i++) { 
-                group_of_users[i][0]['related_users'] = [];
-                for(var j=0; j<group_of_users[i][0]['user_mentions'].length; j++){
-                    //use this line to include Retweet to mentioned user list
-                    group_of_users[i][0]['mentioned_users'].push(group_of_users[i][0]['user_mentions'][j]['screen_name']);
-                }
-            };  */  
-            //******************************//
-            
-            console.log(group_of_users.length);
+            console.log(final_data.length);
 			
-			for (var i = 0; i < group_of_users.length;i++) { 
+			for (var i = 0; i < final_data.length;i++) { 
 			//cycle through users
-				group_of_users[i][0]['related_users'] = [];
 				//define popularity for size of the nodes
-				group_of_users[i][0]['popularity'] = group_of_users[i][0]['friends_count']+group_of_users[i][0]['followers_count'];
+				final_data[i]['popularity'] = final_data[i]['following']+final_data[i]['followers'];
 	
-				for(var j=0; j<group_of_users[i].length; j++){
+				for(var j=0; j<final_data[i]['tweets'].length; j++){
 				//cycle through tweets
-					for(var k=0; k<group_of_users[i][j]['user_mentions'].length; k++){
+					for(var k=0; k<final_data[i]['tweets'][j]['user_mentions'].length; k++){
 					//cycle through mentions
-						var mentionedUser = listOfUsers.indexOf(group_of_users[i][j]['user_mentions'][k]['screen_name']);
-						
-						if (mentionedUser != -1){
-							group_of_users[i][0]['related_users'].push(mentionedUser);
-						}
+                        if(final_data[i]['tweets'][j]['user_mentions'][k] != 0){
+                            var mentionedUser = listOfUsers.indexOf(final_data[i]['tweets'][j]['user_mentions'][k]['screen_name']);
+                            
+                            if (mentionedUser != -1){
+                                final_data[i]['related_users'].push(mentionedUser);
+                            }
+                        }
 					}
 				}
 			};
