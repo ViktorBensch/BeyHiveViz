@@ -26,7 +26,7 @@
 			for (var i = 0; i < cArray.length; i++) {
 				obj[cArray[i]] = (obj[cArray[i]] || 0) + 1;
 			}
-			console.log(obj);
+			//console.log(obj);
 			return obj;
 		};
 		
@@ -158,13 +158,10 @@
 					final_data[i]['related_users'] = relUser;
 				}
 			};
-<<<<<<< HEAD
 			final_data[0]['most_common_words'] = d3.entries(counter(listOfHashtags)).sort(keySort(d3.descending, "value"));
 			
 			console.log(final_data[0]['most_common_words']);
-=======
 			//console.log(final_data);
->>>>>>> origin/master
             console.log("finished");
             
         });
