@@ -20,12 +20,28 @@
             .append("svg")
             .attr("width", w_canvas)
             .attr("height", h_canvas);
+			
+		function counter(cArray){
+			var obj = { };
+			for (var i = 0; i < cArray.length; i++) {
+				obj[cArray[i]] = (obj[cArray[i]] || 0) + 1;
+			}
+			console.log(obj);
+			return obj;
+		};
+		
+		function keySort(sortfunc, field){
+			return function(a, b){
+				return sortfunc(a[field], b[field]);
+			}
+		}
             
 		
         d3.text("DEC_whole_month.txt", function(data) {
         
             var array = data.split("\n");
 			var listOfUsers = [];
+			var listOfHashtags = [];
             
             var json_array = []
             for (var i = 0; i < array.length-1; i++) { 
@@ -131,6 +147,12 @@
 	
 				for(var j=0; j<final_data[i]['tweets'].length; j++){
 				//cycle through tweets
+					if(final_data[i]['tweets'][j]['hashtags'].length != 0){
+						for(var k=0; k<final_data[i]['tweets'][j]['hashtags'].length; k++){
+							listOfHashtags.push(final_data[i]['tweets'][j]['hashtags'][k]['text']);
+							console.log(final_data[i]['tweets'][j]['hashtags'][k]['text']);
+						}
+					}
 					var mentionedUser = listOfUsers.indexOf(final_data[i]['tweets'][j]['in_reply_to_screen_name']);
 					if (mentionedUser != -1){ 
 						final_data[i]['related_users'].push(mentionedUser);
@@ -146,8 +168,14 @@
                         }
 					}
 				}
+				if (final_data[i]['related_users'].length != 0){
+					relUser = counter(final_data[i]['related_users']);
+					final_data[i]['related_users'] = relUser;
+				}
 			};
-			console.log(final_data);
+			final_data[0]['most_common_words'] = d3.entries(counter(listOfHashtags)).sort(keySort(d3.descending, "value"));
+			
+			console.log(final_data[0]['most_common_words']);
             console.log("finished");
             
         });
