@@ -21,6 +21,11 @@
               font: 300 38px Helvetica Neue;
               fill: #666;
             }
+
+            .groups {
+              font: 300 30px Helvetica Neue;
+              fill: #666;
+            }            
         </style>
         <title>D3 Test</title>
         <script type="text/javascript" src="d3/d3.v3.js"></script>
@@ -33,12 +38,12 @@
             d3.json("text.html", function(root){ 
             //ALL code using the data here
             	//console.log(final_data);
-                var w = 800;
-                var h = 800;
-
+                var w = 1000;
+                var h = 1000;
+                var padding = 200;
                 var data = {
                 	10: {'words': 
-                			["A","B","C"], 
+                			["AllTheSingleLadies","Bey","Cheated"], 
                 		'users':
                 			[["anne", "abel", "arend",'annemies','anja'], ["bert", "bonno","bill","bob"], ["carl","cato",'catelijn',"christina"]],
                 		'relations': 
@@ -125,32 +130,40 @@
 					var word = svg.append("text")
 	                    .attr("class","title")
 	                    .attr("y", h/2)
-	                    .attr("x", w/2 - 30)
+	                    .attr("x", w/2 )
+						.attr("text-anchor", "middle")
 	                    .text("Bey");
 	                    
 	                //My first useless little test point
 	                var point1 = svg.append("circle")
-	                	.attr("cx",300)
-	                	.attr("cy",300)
+	                	.attr("cx",h/2)
+	                	.attr("cy",w/2 - 100)
 	                	.attr("r",5)
 	                	.attr("user",'Stranger')
 	                	.attr("Tag",'None')
-	                	.attr("fill","red");
+	                	.attr("fill","red")
+	                	.on("click", function(){
+	                		month = update(data,month+1);
+
+	                	});
 	                	
 	                //My second useless little test point
 	                var point2 = svg.append("circle")
-	                	.attr("cx",500)
-	                	.attr("cy",500)
+	                	.attr("cx",h/2)
+	                	.attr("cy",w/2 + 100)
 	                	.attr("r",5)
 	                	.attr("user",'Loner')
 	                	.attr("Tag",'None')
-	                	.attr("fill","purple");		
+	                	.attr("fill","purple")
+	                	.on("click", function(){
+	                		month = update(data,month-1);
+	                	});		
 				}
 
 				
 				//Place the top words in the correct location in the svg
 				function mapWords(words,w,h){
-					var padding = 100;
+					//var padding = 100;
 					cx = w/2;
 					cy = h/2;
 					radius = Math.min(cx,cy) - padding;		
@@ -161,7 +174,8 @@
 		                .text(function(d) {
 		                    return d;
 		                })
-		                .attr("class","groups")
+     					.attr("class","groups")
+     					.attr("text-anchor", "middle")
 		                .attr("x", function(d, i) {
 		                    return cx + radius*Math.cos(i/words.length*Math.PI*2);
 		                })
@@ -173,7 +187,7 @@
 				function mapUsers(words,users, w,h){
 					var userDict = [];
 					var userIndexDict = {};
-					var padding = 100;
+					//var padding = 100;
 					cx = w/2;
 					cy = h/2;
 					radius = Math.min(cx,cy) - padding;
@@ -209,6 +223,7 @@
 						.attr("cy", function(d) {return d.y;})
 						.attr("fill", "lime")
 						.attr("r", 10)
+						.attr("opacity", 0.6)
 						//Adds notification on mouseover
 						.on("mouseover", function(d){
 							var xPos = parseFloat(d3.select(this).attr("cx"));
@@ -257,7 +272,7 @@
 		            	.attr('opacity',0.2)
 		            	.attr('stroke-width',3); 						
 				}
-
+				//Create additional update that puts user-word groups together
 				function update(data,month){
 					console.log('Update',month, Object.keys(data))
 					//Range of data hard-coded. ALTER LATER!!
