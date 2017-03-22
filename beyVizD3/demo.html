@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="../Visualization/KindaBlack.css"></link>
+
+        <title>User Classification</title>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
+		<script type="text/javascript" src="d3/d3.v3.js"></script>
+        <style type="text/css">
+
+		</style>
+    </head>
+    <body>
+        <script type="text/javascript">
+		
+		//used to count occurences inside the given array, returns an object		
+		function counter(cArray){
+			var obj = { };
+			for (var i = 0; i < cArray.length; i++) {
+				obj[cArray[i]] = (obj[cArray[i]] || 0) + 1;
+			}
+			//console.log(obj);
+			return obj;
+		};
+		
+		//only used to make the hashtags sortable
+		function keySort(sortfunc, field){
+			return function(a, b){
+				return sortfunc(a[field], b[field]);
+			}
+		}
+            
+		
+        d3.text("DEC_whole_month.txt", function(data) {
+        
+            var array = data.split("\n");
+			var listOfUsers = [];
+			var listOfHashtags = [];
+            
+            var json_array = []
+            for (var i = 0; i < array.length-1; i++) { 
+                json_array.push(JSON.parse(array[i]));
+            }
+            data = ""
+            array = [];
+            
+            grouped = {};
+
+            for (var i = 0; i < json_array.length; i++) { 
+                grouped[json_array[i].screen_name] = grouped[json_array[i].screen_name] || [];
+                grouped[json_array[i].screen_name].push(json_array[i]);
+            };
+            
+            var group_of_users = Object.keys(grouped).map(function(k) { return grouped[k] });
+                        
+            console.log(group_of_users.length);
+            for (var i = 0; i < group_of_users.length;) { 
+                    if(group_of_users[i][0]['followers']<10000)
+                    {
+                        group_of_users.splice(i,1);
+                    }
+                    else
+                    {
+						listOfUsers.push(group_of_users[i][0]['screen_name']);
+                        i++;
+                    }
+            };      
+			
+            
+            var final_data = []
+            related_arr = []
+            for(var i = 0; i<group_of_users.length; i++)
+            {
+                final_data.push({
+                    screen_name: group_of_users[i][0]['screen_name'],
+                    location: group_of_users[i][0]['user_location'],
+                    followers: group_of_users[i][0]['followers'],
+                    following: group_of_users[i][0]['following'],
+                    tweet_count: group_of_users[i].length, 
+                    tweets: [],
+                    related_users: []
+                });
+                for(var j = 0; j<group_of_users[i].length; j++){
+                    final_data[i]['tweets'].push({
+                        text: group_of_users[i][j]['text'],
+                        timestamp: group_of_users[i][j]['timestamp'],
+                        hashtags: group_of_users[i][j]['hashtags'],
+						user_mentions: group_of_users[i][j]['user_mentions'],
+						in_reply_to_screen_name: group_of_users[i][j]['in_reply_to_screen_name']
+                    });
+                    //final_data[i]['related_users'].push(group_of_users[i][j]['in_reply_to_screen_name']);
+                    //related_arr.push(group_of_users[i][j]['in_reply_to_screen_name']);
+                }
+            }
+            
+            group_of_users = []
+            
+            //We only have people with more than 10.000 followers.
+            //******************************//
+            
+            console.log(final_data.length);
+			
+			
+			//*****************
+			//create  relations
+			//*****************
+			
+			for (var i = 0; i < final_data.length;i++) { 
+			//cycle through users
+				//define popularity for size of the nodes
+				final_data[i]['popularity'] = final_data[i]['following']+final_data[i]['followers'];
+	
+				for(var j=0; j<final_data[i]['tweets'].length; j++){
+				//cycle through tweets
+					if(final_data[i]['tweets'][j]['hashtags'].length != 0){
+						for(var k=0; k<final_data[i]['tweets'][j]['hashtags'].length; k++){
+							listOfHashtags.push(final_data[i]['tweets'][j]['hashtags'][k]['text']);
+							console.log(final_data[i]['tweets'][j]['hashtags'][k]['text']);
+						}
+					}
+					var mentionedUser = listOfUsers.indexOf(final_data[i]['tweets'][j]['in_reply_to_screen_name']);
+					if (mentionedUser != -1){ 
+						final_data[i]['related_users'].push(mentionedUser);
+					}
+					for(var k=0; k<final_data[i]['tweets'][j]['user_mentions'].length; k++){
+					//cycle through mentions
+                        if(final_data[i]['tweets'][j]['user_mentions'][k] != 0){
+                            var mentionedUser = listOfUsers.indexOf(final_data[i]['tweets'][j]['user_mentions'][k]['screen_name']);
+                            
+                            if (mentionedUser != -1){
+                                final_data[i]['related_users'].push(mentionedUser);
+                            }
+                        }
+					}
+				}
+				if (final_data[i]['related_users'].length != 0){
+					relUser = counter(final_data[i]['related_users']);
+					final_data[i]['related_users'] = relUser;
+				}
+			};
+			final_data[0]['most_common_words'] = d3.entries(counter(listOfHashtags)).sort(keySort(d3.descending, "value"));
+			
+			//console.log(final_data[0]['most_common_words']);
+			//console.log(final_data);
+            console.log("Preprocessing finished");
+            
+            /*
+            VISUALISATION PART
+            */
+
+            var w = 1000;
+            var h = 1000;
+            var padding = 200;
+            var wordClickList = [];
+            //FIX THIS LATER!!
+            var breakUpList = {10:{},11:{}};
+
+            //Inputs from previous part
+            var input_words = d3.entries(counter(listOfHashtags)).sort(keySort(d3.descending, "value"));
+            var input_users = listOfUsers;
+            var input_relations = [];
+
+
+            console.log('words',input_words);
+            console.log('users', input_users);
+            console.log(final_data);
+            var data = {
+                10: {'words': 
+                        ["AllTheSingleLadies","Bey","Cheated"], 
+                    'users':
+                        [["anne", "abel", "arend",'annemies','anja'], ["bert", "bonno","bill","bob"], ["carl","cato",'catelijn',"christina"]],
+                    'relations': 
+                        [['annemies','anja'],['anne','catelijn'],['bert','anne'], ['bonno','cato'] ]
+                    },
+                11: {
+                    'words': 
+                        ["F","G","H","I"], 
+                    'users':
+                        [['fred','fillipa','florence'], ['gerta','gilly','gerold','geoffry','gina'], ['harry','henry','holly','hildegard'],['isa','imogen']],
+                    'relations': 
+                        [['fred','harry'],['fillipa','florence'],['holly','gilly'], ['holly','gina'] ]
+                }
+            };
+            var month = 10
+            var tooltip = d3.select("body")
+                .append("div")
+                .style("position", "absolute")
+                .style("z-index", "10")
+                .style("visibility", "hidden")
+                .text("a simple tooltip");
+
+            var svg = d3.select("body")
+                .append("svg")
+                .attr("width", w)
+                .attr("height", h);
+
+            //Get the data subsets
+            var topWords = getWords(data,month);
+            var topUsers = getUsers(data,month);
+            var topRelations = getRelations(data,month);
+            //Map the data onto the visualization
+            mapWords(topWords,w,h);
+            [userLocations, usersIndexed] = mapUsers(topWords,topUsers,w,h);
+            mapRelations(topRelations,usersIndexed);
+
+            createCircles(userLocations);
+
+            restElems();
+
+            //Describe actions click event
+            window.focus();
+            d3.select(window).on("keydown", function() {
+                switch (d3.event.keyCode) {
+                  case 37: month -= 1; break;
+                  case 39: month += 1; break;
+                }
+                month = update(data,month);
+            }); 
+
+
+
+            //Analyse the dataset and returns the most used words
+            function getWords(data,month){
+                //EXTRACT FROM DATAFILE!! FIX THIS LATER!!
+
+                return data[month].words
+                //This is just a toy example    
+                /*return ["A","B","C"];*/
+            }
+
+            function getUsers(data,month){
+                //EXTRACT FROM DATAFILE!! FIX THIS LATER!!
+                
+                return data[month].users
+                //This is just a toy example
+                /*
+                return [["anne", "abel", "arend",'annemies','anja'], 
+                ["bert", "bonno","bill","bob"], ["carl","cato",'catelijn',"christina"]];*/
+                }
+            
+            function getRelations(data,month){
+                //EXTRACT FROM DATAFILE!! FIX THIS LATER!!
+                
+                return data[month].relations
+                /*
+                //This is just a toy example
+                return [['annemies','anja'],['anne','catelijn'],
+                ['bert','anne'], ['bonno','cato'] ]*/;
+            }
+            
+            function restElems(){
+                //Add title in center
+                var word = svg.append("text")
+                    .attr("class","title")
+                    .attr("y", h/2)
+                    .attr("x", w/2 )
+                    .attr("text-anchor", "middle")
+                    .text("Bey")
+                    .on("click", function(){
+                        //Add the word-groups together
+                        wordClickList = wordClickList.sort();
+                        var naming = wordClickList.join(' & ') ;
+                        //Check if the combination isn't already present in database, if not: add
+                        if(data[month].words.indexOf(naming)<0 && wordClickList.length>0){
+                            data[month].words.push(naming);
+
+                            wordSubgroupList = []
+                            //FIX THIS LATER!!! The users aren't structured like this in the real database
+                            wordUserList = [];
+                            for (var i = 0; i < wordClickList.length; i++) {
+                                var userGroup =(data[month].users[data[month].words.indexOf(wordClickList[i])])
+                                console.log(userGroup);
+                                wordUserList = wordUserList.concat(userGroup);
+                                wordSubgroupList.push(userGroup);
+
+
+                                //remove added element from origal word-array and user-array
+                                //console.log('words before ',data[month].words);
+                                //console.log('users before ',data[month].users);
+                                //console.log('user ind ',data[month].words.indexOf(userGroup));
+                                data[month].words.splice(data[month].words.indexOf(wordClickList[i]),1)
+                                data[month].users.splice(data[month].users.indexOf(userGroup),1)
+                                //console.log('words after ',data[month].words);
+                                //console.log('users after ',data[month].users);
+
+                            }
+                            data[month].users.push(wordUserList);
+                            //console.log('wuList: ',wordUserList);
+                            breakUpList[month][wordClickList.sort()] = wordSubgroupList;
+                            //console.log('breakup',breakUpList);
+
+                        }
+                        update(data,month);
+                        wordClickList = [];
+                    }); 
+                    
+                //My first useless little test point
+                var point1 = svg.append("circle")
+                    .attr("cx",h/2)
+                    .attr("cy",w/2 - 100)
+                    .attr("r",5)
+                    .attr("user",'Stranger')
+                    .attr("Tag",'None')
+                    .attr("fill","#205454")
+                    .on("click", function(){
+                        month = update(data,month+1);
+
+                    });
+                    
+                //My second useless little test point
+                var point2 = svg.append("circle")
+                    .attr("cx",h/2)
+                    .attr("cy",w/2 + 100)
+                    .attr("r",5)
+                    .attr("user",'Loner')
+                    .attr("Tag",'None')
+                    .attr("fill","#205454")
+                    .on("click", function(){
+                        month = update(data,month-1);
+                    });     
+            }
+
+            
+            //Place the top words in the correct location in the svg
+            function mapWords(words,w,h){
+                //var padding = 100;
+                cx = w/2;
+                cy = h/2;
+                radius = Math.min(cx,cy) - padding;     
+                svg.selectAll("text.groups")
+                    .data(words)
+                    .enter()
+                    .append("text")
+                    .text(function(d) {
+                        return d;
+                    })
+                    .attr("class","groups")
+                    .attr("text-anchor", "middle")
+                    .attr("x", function(d, i) {
+                        return cx + radius*Math.cos(i/words.length*Math.PI*2);
+                    })
+                    .attr("y", function(d,i) {
+                        return cy + radius*Math.sin(i/words.length*Math.PI*2);
+                    })
+                    .on("click", function(){
+                        wordIndex = wordClickList.indexOf(d3.select(this).text());
+                        if(wordIndex>-1){
+                            wordClickList.splice(wordIndex,1);
+                        }else{
+                            wordClickList.push(d3.select(this).text());
+                        }
+                    })
+            }
+            //Place the users in the correcct location in the svg
+            function mapUsers(words,users, w,h){
+                var userDict = [];
+                var userIndexDict = {};
+                //var padding = 100;
+                cx = w/2;
+                cy = h/2;
+                radius = Math.min(cx,cy) - padding;
+
+                for (i=0; i<users.length; i++){
+                    wordX = cx + radius*Math.cos(i/words.length*Math.PI*2)+5; //+5 and
+                    wordY = cy + radius*Math.sin(i/words.length*Math.PI*2)-5; //-5 added to compensate for Word length
+                    for (j= 0; j<users[i].length;j++){
+                        circleX = wordX + 40*Math.cos(j/users[i].length*Math.PI*2);
+                        circleY = wordY + 40*Math.sin(j/users[i].length*Math.PI*2);
+                        userX = wordX + 40*Math.cos(j/users[i].length*Math.PI*2);
+                        userY = wordY + 40*Math.sin(j/users[i].length*Math.PI*2);
+                        //userDict[users[i][j]] = [userX,userY];
+                        smallDict = {};
+                        smallDict['name'] = users[i][j];
+                        smallDict['x'] =  userX;
+                        smallDict['y'] =  userY;
+                        userDict.push(smallDict);
+                        userIndexDict[users[i][j]] = {'x': userX,'y': userY}
+                    }
+                }
+                return [userDict, userIndexDict];
+            }
+            
+            //Places circles on the svg
+            function createCircles(dataset){
+                svg.selectAll("circle.users")
+                    .data(dataset)
+                    .enter()
+                    .append("svg:circle")
+                    .attr("class","users")
+                    .attr("cx", function(d) {return d.x;})
+                    .attr("cy", function(d) {return d.y;})
+                    .attr("fill", "lime")
+                    .attr("r", 6)
+                    .attr("opacity", 0.6)
+                    //Adds notification on mouseover
+                    .on("mouseover", function(d){
+                        var xPos = parseFloat(d3.select(this).attr("cx"));
+                        var yPos = parseFloat(d3.select(this).attr("cy"));
+                        svg.append("text")
+                              .attr("id", "tooltip")
+                              .attr("x", xPos)
+                              .attr("y", yPos)
+                              .attr("class", "usersText")
+                              .attr("text-anchor", "middle")
+                              .text(d.name);
+                    })
+                    .on("mouseout", function() {
+                        //Remove the tooltip
+                        d3.select("#tooltip").remove();
+                    })
+            }
+
+            //Places the relationship lines between the correct points
+            function mapRelations(relations,userLocations){
+                svg.selectAll('line.relations')
+                    .data(relations)
+                    .enter()
+                    .append('line')
+                    .attr('class','relations')
+                    .attr('x1',function(d, i) {
+                        //from 1rst person in relationship take 1st (x) coord
+                        return userLocations[d[0]].x
+                    })
+                    .attr('x2',function(d, i) {
+
+                        return userLocations[d[1]].x
+                    })
+                    .attr('y1',function(d, i) {
+
+                        return userLocations[d[0]].y
+                    })
+                    .attr('y2',function(d, i) {
+
+                        return userLocations[d[1]].y
+                    })
+                    //.attr('stroke', 'grey')
+                    .attr('opacity',0.5)
+                    .attr('stroke-width',2);                        
+            }
+            //Create additional update that puts user-word groups together
+            function update(data,month){
+                //Range of data hard-coded. FIX THIS LATER!!
+                if(month > 11){
+                    month = 11;
+                    return month;
+                }
+                else if ( month< 10){
+                    month = 10;
+                    return month;
+                }
+                else{
+                    //Remove old elements
+                    svg.selectAll('text').remove();
+                    svg.selectAll('circle').remove();
+                    svg.selectAll('line').remove();
+
+                    restElems();
+
+                    var topWords = getWords(data,month);
+                    var topUsers = getUsers(data,month);
+                    var topRelations = getRelations(data,month);
+                    
+                    mapWords(topWords,w,h);
+                    [userLocations, usersIndexed] = mapUsers(topWords,topUsers,w,h);
+                    mapRelations(topRelations,usersIndexed);
+                    createCircles(userLocations);
+
+                    return month;                       
+                }
+            }
+
+
+        });
+   
+        </script>
+        
+    </body>
+</html>

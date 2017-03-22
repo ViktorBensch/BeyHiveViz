@@ -5,15 +5,18 @@
         <link rel="stylesheet" type="text/css" href="../Visualization/KindaBlack.css"></link>
         <title>D3 Test</title>
         <script type="text/javascript" src="d3/d3.v3.js"></script>
-		<script type="text/javascript" src="readData_PasreUsers.js"></script>
+		<script type="text/javascript" src="readData_PasreUsers.html"></script>
 
     </head>
     <body>
 
         <script type="text/javascript">
-            d3.json("text.html", function(root){ 
+            d3.json("jan_whole_month.txt", function(root){ 
             //ALL code using the data here
-            	//console.log(final_data);
+
+            	//console.log(final_data[0]['most_common_words']);
+
+   
                 var w = 1000;
                 var h = 1000;
                 var padding = 200;
