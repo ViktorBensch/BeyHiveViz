@@ -14,7 +14,7 @@
             d3.json("text.html", function(root){ 
             //ALL code using the data here
             	//console.log(final_data);
-                var w =	1000;
+                var w = 1000;
                 var h = 1000;
                 var padding = 200;
                 var wordClickList = [];
@@ -246,7 +246,7 @@
 			            .attr("cx", function(d) {return d.x;})
 						.attr("cy", function(d) {return d.y;})
 						.attr("fill", "lime")
-						.attr("r", 10)
+						.attr("r", 6)
 						.attr("opacity", 0.6)
 						//Adds notification on mouseover
 						.on("mouseover", function(d){
@@ -254,7 +254,7 @@
 							var yPos = parseFloat(d3.select(this).attr("cy"));
 							svg.append("text")
 								  .attr("id", "tooltip")
-								  .attr("x", xPos+25)
+								  .attr("x", xPos)
 								  .attr("y", yPos)
 								  .attr("class", "usersText")
 								  .attr("text-anchor", "middle")
@@ -289,9 +289,9 @@
 
 		                    return userLocations[d[1]].y
 		                })
-		            	.attr('stroke', 'grey')
-		            	.attr('opacity',0.2)
-		            	.attr('stroke-width',3); 						
+		            	//.attr('stroke', 'grey')
+		            	.attr('opacity',0.5)
+		            	.attr('stroke-width',2); 						
 				}
 				//Create additional update that puts user-word groups together
 				function update(data,month){
@@ -326,6 +326,10 @@
 				}
 });
         </script>
-            
+    <footer>
+    	This VisualiBeysion Brought to You By: <br>
+    	Viktor Bensch, Jordan Brown, Kellie English, Tom Koenen, Misra Turp <br>
+    	Universiteit van Amsterdam
+    </footer>
     </body>
 </html>
