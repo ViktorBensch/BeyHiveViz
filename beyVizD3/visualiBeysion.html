@@ -14,9 +14,12 @@
             d3.json("text.html", function(root){ 
             //ALL code using the data here
             	//console.log(final_data);
-                var w = 1000;
+                var w =	1000;
                 var h = 1000;
                 var padding = 200;
+                var wordClickList = [];
+                //FIX THIS LATER!!
+                var breakUpList = {10:{},11:{}};
                 var data = {
                 	10: {'words': 
                 			["AllTheSingleLadies","Bey","Cheated"], 
@@ -74,7 +77,7 @@
 
                	//Analyse the dataset and returns the most used words
 				function getWords(data,month){
-					//EXTRACT FROM DATAFILE!!
+					//EXTRACT FROM DATAFILE!! FIX THIS LATER!!
 
 					return data[month].words
 					//This is just a toy example	
@@ -82,7 +85,7 @@
 				}
 
 				function getUsers(data,month){
-					//EXTRACT FROM DATAFILE!!
+					//EXTRACT FROM DATAFILE!! FIX THIS LATER!!
 					
 					return data[month].users
 					//This is just a toy example
@@ -92,7 +95,7 @@
 					}
 				
 				function getRelations(data,month){
-					//EXTRACT FROM DATAFILE!!
+					//EXTRACT FROM DATAFILE!! FIX THIS LATER!!
 					
 					return data[month].relations
 					/*
@@ -108,7 +111,44 @@
 	                    .attr("y", h/2)
 	                    .attr("x", w/2 )
 						.attr("text-anchor", "middle")
-	                    .text("Bey");
+	                    .text("Bey")
+	                    .on("click", function(){
+	                    	//Add the word-groups together
+	                    	wordClickList = wordClickList.sort();
+	                    	var naming = wordClickList.join(' & ') ;
+	                    	//Check if the combination isn't already present in database, if not: add
+	                    	if(data[month].words.indexOf(naming)<0 && wordClickList.length>0){
+	                    		data[month].words.push(naming);
+
+	                    		wordSubgroupList = []
+	                    		//FIX THIS LATER!!! The users aren't structured like this in the real database
+	                    		wordUserList = [];
+	                    		for (var i = 0; i < wordClickList.length; i++) {
+	                    			var userGroup =(data[month].users[data[month].words.indexOf(wordClickList[i])])
+	                    			console.log(userGroup);
+	                    			wordUserList = wordUserList.concat(userGroup);
+	                    			wordSubgroupList.push(userGroup);
+
+
+		                    		//remove added element from origal word-array and user-array
+		                    		//console.log('words before ',data[month].words);
+		                    		//console.log('users before ',data[month].users);
+		                    		//console.log('user ind ',data[month].words.indexOf(userGroup));
+		                    		data[month].words.splice(data[month].words.indexOf(wordClickList[i]),1)
+		                    		data[month].users.splice(data[month].users.indexOf(userGroup),1)
+		                    		//console.log('words after ',data[month].words);
+		                    		//console.log('users after ',data[month].users);
+
+	                    		}
+	                    		data[month].users.push(wordUserList);
+	                    		//console.log('wuList: ',wordUserList);
+	                    		breakUpList[month][wordClickList.sort()] = wordSubgroupList;
+	                    		//console.log('breakup',breakUpList);
+
+	                    	}
+							update(data,month);
+	                		wordClickList = [];
+	                	});	
 	                    
 	                //My first useless little test point
 	                var point1 = svg.append("circle")
@@ -157,6 +197,14 @@
 		                })
 		                .attr("y", function(d,i) {
 		                    return cy + radius*Math.sin(i/words.length*Math.PI*2);
+		                })
+		                .on("click", function(){
+		                	wordIndex = wordClickList.indexOf(d3.select(this).text());
+		                	if(wordIndex>-1){
+		                		wordClickList.splice(wordIndex,1);
+		                	}else{
+		                		wordClickList.push(d3.select(this).text());
+		                	}
 		                })
 				}
 				//Place the users in the correcct location in the svg
@@ -247,8 +295,7 @@
 				}
 				//Create additional update that puts user-word groups together
 				function update(data,month){
-					console.log('Update',month, Object.keys(data))
-					//Range of data hard-coded. ALTER LATER!!
+					//Range of data hard-coded. FIX THIS LATER!!
 					if(month > 11){
 						month = 11;
 						return month;
