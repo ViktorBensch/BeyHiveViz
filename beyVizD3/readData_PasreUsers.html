@@ -20,7 +20,8 @@
             .append("svg")
             .attr("width", w_canvas)
             .attr("height", h_canvas);
-			
+		
+		//used to count occurences inside the given array, returns an object		
 		function counter(cArray){
 			var obj = { };
 			for (var i = 0; i < cArray.length; i++) {
@@ -30,6 +31,7 @@
 			return obj;
 		};
 		
+		//only used to make the hashtags sortable
 		function keySort(sortfunc, field){
 			return function(a, b){
 				return sortfunc(a[field], b[field]);
