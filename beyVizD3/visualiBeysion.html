@@ -138,10 +138,23 @@
 	                    		}
 	                    		data[month].users.push(wordUserList);
 	                    		breakUpList[month][wordClickList.sort()] = wordSubgroupList;
-
+	                    		console.log(wordClickList.sort());
+	                    	//WEIRD BUG ON DECOMPOSING HIERARCHICAL COMBO's (month 11) FIX THIS !!
 	                    	}else if(wordClickList.length === 1 && wordClickList[0].split(" & ").length >1){
-	                    		console.log('hi')
-	                    		var wordClickList[0].split(" & ").sort();
+	                    		var title_subset = wordClickList[0].split(" & ").sort();
+	                    		var subset_users = (breakUpList[month][title_subset]);
+	                    		var combo_users =(data[month].users[data[month].words.indexOf(title_subset)])
+	                    		console.log('words',data[month].words);
+	                    		//remove combined elements
+	                    		console.log('before',data[month].users)
+	                    		//Remove combined data
+								data[month].words.splice(data[month].words.indexOf(wordClickList[0]),1)
+		                    	data[month].users.splice(data[month].words.indexOf(wordClickList[0]),1)
+		                    	//Add splitted data
+		                    	data[month].words= data[month].words.concat(title_subset);
+		                    	data[month].users= data[month].users.concat(subset_users);
+		                    	console.log('after',data[month].words, data[month].users)
+
 
 	                    	}
 							update(data,month);
