@@ -132,21 +132,16 @@
 	                    			wordUserList = wordUserList.concat(userGroup);
 	                    			wordSubgroupList.push(userGroup);
 
-
 		                    		//remove added element from origal word-array and user-array
-		                    		//console.log('words before ',data[month].words);
-		                    		//console.log('users before ',data[month].users);
-		                    		//console.log('user ind ',data[month].words.indexOf(userGroup));
 		                    		data[month].words.splice(data[month].words.indexOf(wordClickList[i]),1)
 		                    		data[month].users.splice(data[month].users.indexOf(userGroup),1)
-		                    		//console.log('words after ',data[month].words);
-		                    		//console.log('users after ',data[month].users);
-
 	                    		}
 	                    		data[month].users.push(wordUserList);
-	                    		//console.log('wuList: ',wordUserList);
 	                    		breakUpList[month][wordClickList.sort()] = wordSubgroupList;
-	                    		//console.log('breakup',breakUpList);
+
+	                    	}else if(wordClickList.length === 1 && wordClickList[0].split(" & ").length >1){
+	                    		console.log('hi')
+	                    		var wordClickList[0].split(" & ").sort();
 
 	                    	}
 							update(data,month);
