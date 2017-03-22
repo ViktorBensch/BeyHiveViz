@@ -4,7 +4,8 @@
 }
 
 body{
-background-color: #171721;
+	background-color: #E8BCD5;
+	text-transform: uppercase;
 }
 
 div.temp{
@@ -18,4 +19,40 @@ div.temp{
 	color: #474751;
 	text-align: center;
 	
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: #00000A;
+	shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: Oswald;
+    font-size: 11px;
+}
+
+.title {
+  font: 300 38px Oswald;
+  fill: #00000A;
+}
+
+.groups {
+  font: 300 30px Oswald;
+  fill: #608586;
+} 
+
+.users {
+	fill: #9D8074;
+}
+
+.usersText {
+	font-size: 11px;
+	font-weight: bold;
+	fill: #1C1938;
+}
+
+.relations {
+	stroke: #00000A;
 }
