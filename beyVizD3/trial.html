@@ -14,6 +14,7 @@
     <body>
         <script type="text/javascript">
 		
+        //****************UTILITY FUNCTIONS****************//
 		//used to count occurences inside the given array, returns an object		
 		function counter(cArray){
 			var obj = { };
@@ -30,10 +31,11 @@
 				return sortfunc(a[field], b[field]);
 			}
 		}
+        //**************************************************//
             
-		
         d3.text("DEC_whole_month.txt", function(data) {
-        
+        //****************READ DATA****************//
+            //parse file
             var array = data.split("\n");
 			var listOfUsers = [];
 			var listOfHashtags = [];
@@ -47,6 +49,7 @@
             
             grouped = {};
 
+            //write tweets in groups of users
             for (var i = 0; i < json_array.length; i++) { 
                 grouped[json_array[i].screen_name] = grouped[json_array[i].screen_name] || [];
                 grouped[json_array[i].screen_name].push(json_array[i]);
@@ -54,7 +57,7 @@
             
             var group_of_users = Object.keys(grouped).map(function(k) { return grouped[k] });
                         
-            //console.log(group_of_users.length);
+            //eliminate the tweets from users that are not popular            
             for (var i = 0; i < group_of_users.length;) { 
                     if(group_of_users[i][0]['followers']<10000)
                     {
@@ -67,7 +70,7 @@
                     }
             };      
 			
-            
+            //create the main data structure to be used
             var final_data = []
             related_arr = []
             for(var i = 0; i<group_of_users.length; i++)
@@ -97,15 +100,11 @@
             group_of_users = []
             
             //We only have people with more than 10.000 followers.
-            //******************************//
+            //*******************END READ DATA***************************//
             
-            //console.log(final_data.length);
 			
 			
-			//*****************
-			//create  relations
-			//*****************
-			
+            //*******************FINDING RELATIONS***********************//			
 			for (var i = 0; i < final_data.length;i++) { 
 			//cycle through users
 				//define popularity for size of the nodes
@@ -139,17 +138,16 @@
 					final_data[i]['related_users'] = relUser;
 				}
 			};
+            //*******************END FIDING RELATIONS*************************//
+            
+            //GET MOST COMMON WORDS AS HASHTAGS
 			final_data[0]['most_common_words'] = d3.entries(counter(listOfHashtags)).sort(keySort(d3.descending, "value"));
 			
-			//console.log(final_data[0]['most_common_words']);
-			//console.log(final_data);
             console.log("Preprocessing finished");
             
             /*
             VISUALISATION PART
             */
-
-
 
             var w = 1200;
             var h = 1200;
@@ -196,7 +194,7 @@
 
             mapWords(data_word,w,h);
             [userLocations, usersIndexed] = mapUsers(data_word,data_users,w,h);
-            //mapRelations(topRelations,usersIndexed);
+            mapRelations(topRelations,usersIndexed);
 
             createCircles(userLocations);
 
@@ -237,22 +235,8 @@
 
             function getTopData(){
                 //EXTRACT FROM DATAFILE!! FIX THIS LATER!!
-
-                /*for (var i = 0; i < tWords.length; i++) {
-                    wordArray = [];
-                    for (var j = 0; j < final_data.length; i++) {
-                        var words =  final_data[i]['tweets'][j]['text'].split(" ");
-                        for(var t = 0; t<words.length; t++){
-                            if (tWords[i] === words[t]) {
-                                word
-                            }
-                        }
-
-                        
-                    }
-                    tWords[i]
-                }*/
                 
+                //*******************GET MOSTLY USED WORDS WITH USERS AND COUNTS********************//
                 var stopwords = ["","a", "whose", "ever", "many", "much", "me", "will", "always", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any","are","aren't","as","at","be","because","been","before","being","below","between","both","but","by","can't","cannot","could","couldn't","did","didn't","do","does","doesn't","doing","don't","down","during","each","few","for","from","further","had","hadn't","has","hasn't","have","haven't","having","he","he'd","he'll","he's","her","here","here's","hers","herself","him","himself","his","how","how's","i","i'd","i'll","i'm","i've","if","in","into","is","isn't","it","it's","its","itself","let's","me","more","most","mustn't","my","myself","no","nor","not","of","off","on","once","only","or","other","ought","our","ours","ourselves","out","over","own","same","shan't","she","she'd","she'll","she's","should","shouldn't","so","some","such","than","that","that's","the","their","theirs","them","themselves","then","there","there's","these","they","they'd","they'll","they're","they've","this","those","through","to","too","under","until","up","very","was","wasn't","we","we'd","we'll","we're","we've","were","weren't","what","what's","when","when's","where","where's","which","while","who","who's","whom","why","why's","with","won't","would","wouldn't","you","you'd","you'll","you're","you've","your","yours","yourself","yourselves"];
                     var listOfWords = []
                     for(var i=0; i<final_data.length; i++){
@@ -268,10 +252,9 @@
                                     else if(index != -1 && stopwords.indexOf(words[t].toLowerCase()) == -1)
                                     {
                                         listOfWords[index][1]++;
-                                            if(listOfWords[index][2].indexOf(i) == -1){
-                                                listOfWords[index][2].push(i);
-                                            }
-                                        
+                                        if(listOfWords[index][2].indexOf(i) == -1){
+                                            listOfWords[index][2].push(i);
+                                        }
                                     }
                                 }
                             }
@@ -314,7 +297,9 @@
                 return [word_out,count_out,users_out];
                 //return data[month].users
             }
+            //*******************END GETTING DATA************************//
             
+            //*******************FIND RELATIONS AND WRITE TO SEPARATE VAR*****************//
             function getRelations(data,month){
                  var relation_list = []
                 for(var i=0; i<final_data.length; i++)
@@ -330,6 +315,7 @@
                 return relation_list;
                 //return data[month].relations
             }
+            //*******************END FUNCTION**************************//
             
             function restElems(){
                 //Add title in center
