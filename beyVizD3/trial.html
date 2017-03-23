@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <link rel="stylesheet" type="text/css" href="../Visualization/KindaBlack.css"></link>
 
-        <title>User Classification</title>
+        <title>Demo</title>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
 		<script type="text/javascript" src="d3/d3.v3.js"></script>
         <style type="text/css">
@@ -54,9 +54,9 @@
             
             var group_of_users = Object.keys(grouped).map(function(k) { return grouped[k] });
                         
-            console.log(group_of_users.length);
+            //console.log(group_of_users.length);
             for (var i = 0; i < group_of_users.length;) { 
-                    if(group_of_users[i][0]['followers']<10000)
+                    if(group_of_users[i][0]['followers']<1000)
                     {
                         group_of_users.splice(i,1);
                     }
@@ -99,7 +99,7 @@
             //We only have people with more than 10.000 followers.
             //******************************//
             
-            console.log(final_data.length);
+            //console.log(final_data.length);
 			
 			
 			//*****************
@@ -116,7 +116,7 @@
 					if(final_data[i]['tweets'][j]['hashtags'].length != 0){
 						for(var k=0; k<final_data[i]['tweets'][j]['hashtags'].length; k++){
 							listOfHashtags.push(final_data[i]['tweets'][j]['hashtags'][k]['text']);
-							console.log(final_data[i]['tweets'][j]['hashtags'][k]['text']);
+							//console.log(final_data[i]['tweets'][j]['hashtags'][k]['text']);
 						}
 					}
 					var mentionedUser = listOfUsers.indexOf(final_data[i]['tweets'][j]['in_reply_to_screen_name']);
@@ -149,8 +149,10 @@
             VISUALISATION PART
             */
 
-            var w = 1000;
-            var h = 1000;
+
+
+            var w = 1200;
+            var h = 1200;
             var padding = 200;
             var wordClickList = [];
             //FIX THIS LATER!!
@@ -165,23 +167,7 @@
             console.log('words',input_words);
             console.log('users', input_users);
             console.log(final_data);
-            var data = {
-                10: {'words': 
-                        ["AllTheSingleLadies","Bey","Cheated"], 
-                    'users':
-                        [["anne", "abel", "arend",'annemies','anja'], ["bert", "bonno","bill","bob"], ["carl","cato",'catelijn',"christina"]],
-                    'relations': 
-                        [['annemies','anja'],['anne','catelijn'],['bert','anne'], ['bonno','cato'] ]
-                    },
-                11: {
-                    'words': 
-                        ["F","G","H","I"], 
-                    'users':
-                        [['fred','fillipa','florence'], ['gerta','gilly','gerold','geoffry','gina'], ['harry','henry','holly','hildegard'],['isa','imogen']],
-                    'relations': 
-                        [['fred','harry'],['fillipa','florence'],['holly','gilly'], ['holly','gina'] ]
-                }
-            };
+
             var month = 10
             var tooltip = d3.select("body")
                 .append("div")
@@ -196,15 +182,17 @@
                 .attr("height", h);
 
             //Get the data subsets
-            var topWords = getWords(data,month);
-            var topUsers = getUsers(data,month);
+            var topWords = getWords(final_data,month);
+            var topUsers = getUsers(listOfUsers,month,topWords);
             var topRelations = getRelations(data,month);
+            console.log('relations', topRelations);
             //Map the data onto the visualization
-            mapWords(topWords,w,h);
-            [userLocations, usersIndexed] = mapUsers(topWords,topUsers,w,h);
-            mapRelations(topRelations,usersIndexed);
 
-            createCircles(userLocations);
+            mapWords(topWords,w,h);
+            //[userLocations, usersIndexed] = mapUsers(topWords,topUsers,w,h);
+            //mapRelations(topRelations,usersIndexed);
+
+            //createCircles(userLocations);
 
             restElems();
 
@@ -219,34 +207,84 @@
             }); 
 
 
-
             //Analyse the dataset and returns the most used words
             function getWords(data,month){
-                //EXTRACT FROM DATAFILE!! FIX THIS LATER!!
-
-                return data[month].words
-                //This is just a toy example    
-                /*return ["A","B","C"];*/
+                //ADD MONTH SELECTION LATER
+                var in_words = d3.entries(counter(listOfHashtags)).sort(keySort(d3.descending, "value"));
+                var output_list = in_words.slice(0,10);
+                for (var i = 0; i < output_list.length; i++) {
+                    output_list[i] = output_list[i].key;
+                }
+                return output_list;
+                //return data[month].words
             }
 
-            function getUsers(data,month){
-                //EXTRACT FROM DATAFILE!! FIX THIS LATER!!
-                
-                return data[month].users
-                //This is just a toy example
-                /*
-                return [["anne", "abel", "arend",'annemies','anja'], 
-                ["bert", "bonno","bill","bob"], ["carl","cato",'catelijn',"christina"]];*/
+            function isItemInArray(array, item) {
+                for (var a = 0; a < array.length; a++) {
+                    // This if statement depends on the format of your array
+                    if (array[a][0] == item) {
+                        return a;   // Found it
+                    }
                 }
+                return -1;   // Not found
+            }
+
+            function getUsers(listUsers,month,words){
+                //EXTRACT FROM DATAFILE!! FIX THIS LATER!!
+
+                var stopwords = ["","a", "whose", "ever", "many", "much", "me", "will", "always", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any","are","aren't","as","at","be","because","been","before","being","below","between","both","but","by","can't","cannot","could","couldn't","did","didn't","do","does","doesn't","doing","don't","down","during","each","few","for","from","further","had","hadn't","has","hasn't","have","haven't","having","he","he'd","he'll","he's","her","here","here's","hers","herself","him","himself","his","how","how's","i","i'd","i'll","i'm","i've","if","in","into","is","isn't","it","it's","its","itself","let's","me","more","most","mustn't","my","myself","no","nor","not","of","off","on","once","only","or","other","ought","our","ours","ourselves","out","over","own","same","shan't","she","she'd","she'll","she's","should","shouldn't","so","some","such","than","that","that's","the","their","theirs","them","themselves","then","there","there's","these","they","they'd","they'll","they're","they've","this","those","through","to","too","under","until","up","very","was","wasn't","we","we'd","we'll","we're","we've","were","weren't","what","what's","when","when's","where","where's","which","while","who","who's","whom","why","why's","with","won't","would","wouldn't","you","you'd","you'll","you're","you've","your","yours","yourself","yourselves"];
+                    var listOfWords = []
+                    for(var i=0; i<final_data.length; i++){
+                       for(var j=0; j<final_data[i]['tweets'].length;j++){
+                           var words =  final_data[i]['tweets'][j]['text'].split(" ");
+                           for(var t = 0; t<words.length; t++){
+                                if(!words[t].includes("@") && !words[t].toLowerCase().includes("rt") && !words[t].toLowerCase().includes("https")){
+                                    var index = isItemInArray(listOfWords,words[t].toLowerCase());
+                                   
+                                    if(index == -1 && stopwords.indexOf(words[t].toLowerCase()) == -1){
+                                       listOfWords.push([words[t].toLowerCase(),1]);
+                                    }
+                                    else if(index != -1 && stopwords.indexOf(words[t].toLowerCase()) == -1)
+                                    {
+                                        listOfWords[index][1]++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+           
+                //remove words that were mentioned less than 10 times or some other number
+                for(var i=0; i<listOfWords.length;)
+                {
+                    if(listOfWords[i][1]<40)
+                    {
+                        listOfWords.splice(i,1);
+                    }
+                    else{
+                        i++
+                    }
+                }
+
+                console.log('word',listOfWords);
+                console.log('users',listUsers);
+                return []
+                //return data[month].users
+            }
             
             function getRelations(data,month){
-                //EXTRACT FROM DATAFILE!! FIX THIS LATER!!
-                
-                return data[month].relations
-                /*
-                //This is just a toy example
-                return [['annemies','anja'],['anne','catelijn'],
-                ['bert','anne'], ['bonno','cato'] ]*/;
+                 var relation_list = []
+                for(var i=0; i<final_data.length; i++)
+                {
+                    var user_index = listOfUsers.indexOf(final_data[i]['screen_name']);
+                    for(var relation in final_data[i]['related_users']){
+                        var related_index = Number(relation);
+                        var count = final_data[i]['related_users'][relation];
+                        relation_list.push([user_index,related_index, count])
+                    }
+               
+                }
+                return relation_list;
+                //return data[month].relations
             }
             
             function restElems(){
@@ -270,20 +308,12 @@
                             wordUserList = [];
                             for (var i = 0; i < wordClickList.length; i++) {
                                 var userGroup =(data[month].users[data[month].words.indexOf(wordClickList[i])])
-                                console.log(userGroup);
+                                //console.log(userGroup);
                                 wordUserList = wordUserList.concat(userGroup);
                                 wordSubgroupList.push(userGroup);
 
-
-                                //remove added element from origal word-array and user-array
-                                //console.log('words before ',data[month].words);
-                                //console.log('users before ',data[month].users);
-                                //console.log('user ind ',data[month].words.indexOf(userGroup));
                                 data[month].words.splice(data[month].words.indexOf(wordClickList[i]),1)
                                 data[month].users.splice(data[month].users.indexOf(userGroup),1)
-                                //console.log('words after ',data[month].words);
-                                //console.log('users after ',data[month].users);
-
                             }
                             data[month].users.push(wordUserList);
                             //console.log('wuList: ',wordUserList);
