@@ -5,31 +5,34 @@
         <link rel="stylesheet" type="text/css" href="../Visualization/KindaBlack.css"></link>
         <title>D3 Test</title>
         <script type="text/javascript" src="d3/d3.v3.js"></script>
-		<script type="text/javascript" src="readData_PasreUsers.html"></script>
 
     </head>
     <body>
 
         <script type="text/javascript">
+        
+
             d3.json("jan_whole_month.txt", function(root){ 
             //ALL code using the data here
-
+				main();
+			});
             	//console.log(final_data[0]['most_common_words']);
 
-   
-                var w = 1000;
-                var h = 1000;
-                var padding = 200;
-                var wordClickList = [];
-                //FIX THIS LATER!!
-                var breakUpList = {10:{},11:{}};
-                var data = {
+            //Runs all the necessary methods
+   			function main(){
+
+                w = 1000;
+                h = 1000;
+                padding = 200;
+                wordClickList = [];
+                breakUpList = {10:{},11:{}};
+                data = {
                 	10: {'words': 
-                			["AllTheSingleLadies","Bey","Cheated"], 
+                			["AMA","Bey","Cheated","Done","EmmaWatson"], 
                 		'users':
-                			[["anne", "abel", "arend",'annemies','anja'], ["bert", "bonno","bill","bob"], ["carl","cato",'catelijn',"christina"]],
+                			[["anne", "abel", "arend",'annemies','anja'], ["bert", "bonno","bill","bob"], ["carl","cato",'catelijn',"christina"],['dirk','donna','diederik'],['effy','elisabeth','elton','emmanuel']],
                 		'relations': 
-                			[['annemies','anja'],['anne','catelijn'],['bert','anne'], ['bonno','cato'] ]
+                			[['annemies','anja',3],['anne','catelijn'],['bert','anne'], ['bonno','cato'],['effy','elisabeth'],['effy','diederik'],['diederik','emmanuel'],['dirk','elton'] ]
                 		},
                 	11: {
                 		'words': 
@@ -40,7 +43,7 @@
                 			[['fred','harry'],['fillipa','florence'],['holly','gilly'], ['holly','gina'] ]
                 	}
                 };
-                var month = 10
+                month = 10
                 var tooltip = d3.select("body")
 					.append("div")
 					.style("position", "absolute")
@@ -48,7 +51,7 @@
 					.style("visibility", "hidden")
 					.text("a simple tooltip");
 
-                var svg = d3.select("body")
+                svg = d3.select("body")
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h);
@@ -77,7 +80,7 @@
                 }); 
 
 
-
+			}
                	//Analyse the dataset and returns the most used words
 				function getWords(data,month){
 					//EXTRACT FROM DATAFILE!! FIX THIS LATER!!
@@ -335,7 +338,7 @@
 		               	return month;						
 					}
 				}
-});
+
         </script>
     <footer>
     	This VisualiBeysion Brought to You By: <br>
