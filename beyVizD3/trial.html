@@ -473,8 +473,14 @@
 
             //Places the relationship lines between the correct points
             function mapRelations(relations,userLocations){
+                var rel = [];
+                var power = [];
+                for(var i=0;i<relations.length;i++){
+                    rel.push([relations[i][0],relations[i][1]]);
+                    power.push(relations[i][2]);
+                }
                 svg.selectAll('line.relations')
-                    .data(relations)
+                    .data(rel)
                     .enter()
                     .append('line')
                     .attr('class','relations')
