@@ -1,53 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-
         <meta charset="utf-8">
-
-        <style>
-
-            .axis path,
-            .axis line {
-            fill: none;
-            stroke: black;
-            shape-rendering: crispEdges;
-            }
-
-            .axis text {
-                font-family: sans-serif;
-                font-size: 11px;
-            }
-            .title {
-              font: 300 38px Helvetica Neue;
-              fill: #666;
-            }
-
-            .groups {
-              font: 300 30px Helvetica Neue;
-              fill: #666;
-            }            
-        </style>
+        <link rel="stylesheet" type="text/css" href="../Visualization/KindaBlack.css"></link>
         <title>D3 Test</title>
         <script type="text/javascript" src="d3/d3.v3.js"></script>
-		<script type="text/javascript" src="readData_PasreUsers.js"></script>
 
     </head>
     <body>
 
         <script type="text/javascript">
-            d3.json("text.html", function(root){ 
+        
+
+            d3.json("jan_whole_month.txt", function(root){ 
             //ALL code using the data here
-            	//console.log(final_data);
-                var w = 1000;
-                var h = 1000;
-                var padding = 200;
-                var data = {
+				main();
+			});
+            	//console.log(final_data[0]['most_common_words']);
+
+            //Runs all the necessary methods
+   			function main(){
+
+                w = 1000;
+                h = 1000;
+                padding = 200;
+                wordClickList = [];
+                breakUpList = {10:{},11:{}};
+                data = {
                 	10: {'words': 
-                			["AllTheSingleLadies","Bey","Cheated"], 
+                			["AMA","Bey","Cheated","Done","EmmaWatson"], 
                 		'users':
-                			[["anne", "abel", "arend",'annemies','anja'], ["bert", "bonno","bill","bob"], ["carl","cato",'catelijn',"christina"]],
+                			[["anne", "abel", "arend",'annemies','anja'], ["bert", "bonno","bill","bob"], ["carl","cato",'catelijn',"christina"],['dirk','donna','diederik'],['effy','elisabeth','elton','emmanuel']],
                 		'relations': 
-                			[['annemies','anja'],['anne','catelijn'],['bert','anne'], ['bonno','cato'] ]
+                			[['annemies','anja',3],['anne','catelijn'],['bert','anne'], ['bonno','cato'],['effy','elisabeth'],['effy','diederik'],['diederik','emmanuel'],['dirk','elton'] ]
                 		},
                 	11: {
                 		'words': 
@@ -58,7 +43,7 @@
                 			[['fred','harry'],['fillipa','florence'],['holly','gilly'], ['holly','gina'] ]
                 	}
                 };
-                var month = 10
+                month = 10
                 var tooltip = d3.select("body")
 					.append("div")
 					.style("position", "absolute")
@@ -66,7 +51,7 @@
 					.style("visibility", "hidden")
 					.text("a simple tooltip");
 
-                var svg = d3.select("body")
+                svg = d3.select("body")
                     .append("svg")
                     .attr("width", w)
                     .attr("height", h);
@@ -95,10 +80,10 @@
                 }); 
 
 
-
+			}
                	//Analyse the dataset and returns the most used words
 				function getWords(data,month){
-					//EXTRACT FROM DATAFILE!!
+					//EXTRACT FROM DATAFILE!! FIX THIS LATER!!
 
 					return data[month].words
 					//This is just a toy example	
@@ -106,7 +91,7 @@
 				}
 
 				function getUsers(data,month){
-					//EXTRACT FROM DATAFILE!!
+					//EXTRACT FROM DATAFILE!! FIX THIS LATER!!
 					
 					return data[month].users
 					//This is just a toy example
@@ -116,7 +101,7 @@
 					}
 				
 				function getRelations(data,month){
-					//EXTRACT FROM DATAFILE!!
+					//EXTRACT FROM DATAFILE!! FIX THIS LATER!!
 					
 					return data[month].relations
 					/*
@@ -132,7 +117,53 @@
 	                    .attr("y", h/2)
 	                    .attr("x", w/2 )
 						.attr("text-anchor", "middle")
-	                    .text("Bey");
+	                    .text("Bey")
+	                    .on("click", function(){
+	                    	//Add the word-groups together
+	                    	wordClickList = wordClickList.sort();
+	                    	var naming = wordClickList.join(' & ') ;
+	                    	//Check if the combination isn't already present in database, if not: add
+	                    	if(data[month].words.indexOf(naming)<0 && wordClickList.length>0){
+	                    		data[month].words.push(naming);
+
+	                    		wordSubgroupList = []
+	                    		//FIX THIS LATER!!! The users aren't structured like this in the real database
+	                    		wordUserList = [];
+	                    		for (var i = 0; i < wordClickList.length; i++) {
+	                    			var userGroup =(data[month].users[data[month].words.indexOf(wordClickList[i])])
+	                    			console.log(userGroup);
+	                    			wordUserList = wordUserList.concat(userGroup);
+	                    			wordSubgroupList.push(userGroup);
+
+		                    		//remove added element from origal word-array and user-array
+		                    		data[month].words.splice(data[month].words.indexOf(wordClickList[i]),1)
+		                    		data[month].users.splice(data[month].users.indexOf(userGroup),1)
+	                    		}
+	                    		data[month].users.push(wordUserList);
+	                    		breakUpList[month][wordClickList.sort()] = wordSubgroupList;
+	                    		console.log(wordClickList.sort());
+	                    	//WEIRD BUG ON DECOMPOSING HIERARCHICAL COMBO's (month 11) FIX THIS !!
+	                    	}else if(wordClickList.length === 1 && wordClickList[0].split(" & ").length >1){
+	                    		var title_subset = wordClickList[0].split(" & ").sort();
+	                    		//subset users, index problem!
+	                    		console.log('title_subset',title_subset)
+	                    		var subset_users = (breakUpList[month][title_subset]);
+	                    		var combo_users =(data[month].users[data[month].words.indexOf(title_subset)])
+	                    		console.log('words',data[month].words);
+	                    		//remove combined elements
+	                    		console.log('before users',data[month].users,'subsets',subset_users)
+	                    		//Remove combined data
+								data[month].words.splice(data[month].words.indexOf(wordClickList[0]),1)
+		                    	data[month].users.splice(data[month].words.indexOf(wordClickList[0]),1)
+		                    	//Add splitted data
+		                    	data[month].words= data[month].words.concat(title_subset);
+		                    	data[month].users= data[month].users.concat(subset_users);
+		                    	console.log('after',data[month].words, data[month].users)
+		                    	console.log('afterword' ,data[month].words)
+	                    	}
+							update(data,month);
+	                		wordClickList = [];
+	                	});	
 	                    
 	                //My first useless little test point
 	                var point1 = svg.append("circle")
@@ -141,7 +172,7 @@
 	                	.attr("r",5)
 	                	.attr("user",'Stranger')
 	                	.attr("Tag",'None')
-	                	.attr("fill","red")
+	                	.attr("fill","#205454")
 	                	.on("click", function(){
 	                		month = update(data,month+1);
 
@@ -154,7 +185,7 @@
 	                	.attr("r",5)
 	                	.attr("user",'Loner')
 	                	.attr("Tag",'None')
-	                	.attr("fill","purple")
+	                	.attr("fill","#205454")
 	                	.on("click", function(){
 	                		month = update(data,month-1);
 	                	});		
@@ -181,6 +212,14 @@
 		                })
 		                .attr("y", function(d,i) {
 		                    return cy + radius*Math.sin(i/words.length*Math.PI*2);
+		                })
+		                .on("click", function(){
+		                	wordIndex = wordClickList.indexOf(d3.select(this).text());
+		                	if(wordIndex>-1){
+		                		wordClickList.splice(wordIndex,1);
+		                	}else{
+		                		wordClickList.push(d3.select(this).text());
+		                	}
 		                })
 				}
 				//Place the users in the correcct location in the svg
@@ -222,7 +261,7 @@
 			            .attr("cx", function(d) {return d.x;})
 						.attr("cy", function(d) {return d.y;})
 						.attr("fill", "lime")
-						.attr("r", 10)
+						.attr("r", 6)
 						.attr("opacity", 0.6)
 						//Adds notification on mouseover
 						.on("mouseover", function(d){
@@ -230,13 +269,10 @@
 							var yPos = parseFloat(d3.select(this).attr("cy"));
 							svg.append("text")
 								  .attr("id", "tooltip")
-								  .attr("x", xPos+25)
+								  .attr("x", xPos)
 								  .attr("y", yPos)
+								  .attr("class", "usersText")
 								  .attr("text-anchor", "middle")
-								  .attr("font-family", "sans-serif")
-								  .attr("font-size", "11px")
-								  .attr("font-weight", "bold")
-								  .attr("fill", "black")
 								  .text(d.name);
 						})
 						.on("mouseout", function() {
@@ -268,14 +304,13 @@
 
 		                    return userLocations[d[1]].y
 		                })
-		            	.attr('stroke', 'grey')
-		            	.attr('opacity',0.2)
-		            	.attr('stroke-width',3); 						
+		            	//.attr('stroke', 'grey')
+		            	.attr('opacity',0.5)
+		            	.attr('stroke-width',2); 						
 				}
 				//Create additional update that puts user-word groups together
 				function update(data,month){
-					console.log('Update',month, Object.keys(data))
-					//Range of data hard-coded. ALTER LATER!!
+					//Range of data hard-coded. FIX THIS LATER!!
 					if(month > 11){
 						month = 11;
 						return month;
@@ -304,8 +339,12 @@
 		               	return month;						
 					}
 				}
-});
+
         </script>
-            
+    <footer>
+    	This VisualiBeysion Brought to You By: <br>
+    	Viktor Bensch, Jordan Brown, Kellie English, Tom Koenen, Misra Turp <br>
+    	Universiteit van Amsterdam
+    </footer>
     </body>
 </html>

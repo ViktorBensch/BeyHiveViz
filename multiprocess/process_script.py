@@ -135,15 +135,15 @@ def main():
     
     try:
         process1 = Process(target = process_reponse, args = (head, "part1", output_dir, output))
-        process2 = Process(target = process_reponse, args = (head, "part2", output_dir, output))
+        #process2 = Process(target = process_reponse, args = (head, "part2", output_dir, output))
         #process3 = Process(target = process_reponse, args = (head, "part3", output_dir, output))
         
         process1.start()
-        process2.start()
+        #process2.start()
         #process3.start()
         
         process1.join()
-        process2.join()
+        #process2.join()
         #process3.join()
     except:
         print "Error: unable to start thread"
