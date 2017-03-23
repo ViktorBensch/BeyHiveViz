@@ -56,7 +56,7 @@
                         
             //console.log(group_of_users.length);
             for (var i = 0; i < group_of_users.length;) { 
-                    if(group_of_users[i][0]['followers']<1000)
+                    if(group_of_users[i][0]['followers']<10000)
                     {
                         group_of_users.splice(i,1);
                     }
@@ -182,17 +182,23 @@
                 .attr("height", h);
 
             //Get the data subsets
-            var topWords = getWords(final_data,month);
-            var topUsers = getUsers(listOfUsers,month,topWords);
+            //var topWords = getWords(final_data,month);
+
+            //This ordering of function steps is a nightmare!!
+            //return array len3: [ name,count,[users,..]]
+            var [data_word,data_count,data_users] = getTopData();
+            console.log('dw',data_word);
+            console.log('du',data_users);
+
             var topRelations = getRelations(data,month);
             console.log('relations', topRelations);
             //Map the data onto the visualization
 
-            mapWords(topWords,w,h);
-            //[userLocations, usersIndexed] = mapUsers(topWords,topUsers,w,h);
+            mapWords(data_word,w,h);
+            [userLocations, usersIndexed] = mapUsers(data_word,data_users,w,h);
             //mapRelations(topRelations,usersIndexed);
 
-            //createCircles(userLocations);
+            createCircles(userLocations);
 
             restElems();
 
@@ -229,9 +235,24 @@
                 return -1;   // Not found
             }
 
-            function getUsers(listUsers,month,words){
+            function getTopData(){
                 //EXTRACT FROM DATAFILE!! FIX THIS LATER!!
 
+                /*for (var i = 0; i < tWords.length; i++) {
+                    wordArray = [];
+                    for (var j = 0; j < final_data.length; i++) {
+                        var words =  final_data[i]['tweets'][j]['text'].split(" ");
+                        for(var t = 0; t<words.length; t++){
+                            if (tWords[i] === words[t]) {
+                                word
+                            }
+                        }
+
+                        
+                    }
+                    tWords[i]
+                }*/
+                
                 var stopwords = ["","a", "whose", "ever", "many", "much", "me", "will", "always", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any","are","aren't","as","at","be","because","been","before","being","below","between","both","but","by","can't","cannot","could","couldn't","did","didn't","do","does","doesn't","doing","don't","down","during","each","few","for","from","further","had","hadn't","has","hasn't","have","haven't","having","he","he'd","he'll","he's","her","here","here's","hers","herself","him","himself","his","how","how's","i","i'd","i'll","i'm","i've","if","in","into","is","isn't","it","it's","its","itself","let's","me","more","most","mustn't","my","myself","no","nor","not","of","off","on","once","only","or","other","ought","our","ours","ourselves","out","over","own","same","shan't","she","she'd","she'll","she's","should","shouldn't","so","some","such","than","that","that's","the","their","theirs","them","themselves","then","there","there's","these","they","they'd","they'll","they're","they've","this","those","through","to","too","under","until","up","very","was","wasn't","we","we'd","we'll","we're","we've","were","weren't","what","what's","when","when's","where","where's","which","while","who","who's","whom","why","why's","with","won't","would","wouldn't","you","you'd","you'll","you're","you've","your","yours","yourself","yourselves"];
                     var listOfWords = []
                     for(var i=0; i<final_data.length; i++){
@@ -242,32 +263,55 @@
                                     var index = isItemInArray(listOfWords,words[t].toLowerCase());
                                    
                                     if(index == -1 && stopwords.indexOf(words[t].toLowerCase()) == -1){
-                                       listOfWords.push([words[t].toLowerCase(),1]);
+                                       listOfWords.push([words[t].toLowerCase(),1,[i]]);
                                     }
                                     else if(index != -1 && stopwords.indexOf(words[t].toLowerCase()) == -1)
                                     {
                                         listOfWords[index][1]++;
+                                            if(listOfWords[index][2].indexOf(i) == -1){
+                                                listOfWords[index][2].push(i);
+                                            }
+                                        
                                     }
                                 }
                             }
                         }
                     }
-           
-                //remove words that were mentioned less than 10 times or some other number
-                for(var i=0; i<listOfWords.length;)
-                {
-                    if(listOfWords[i][1]<40)
-                    {
-                        listOfWords.splice(i,1);
-                    }
-                    else{
-                        i++
-                    }
-                }
 
-                console.log('word',listOfWords);
-                console.log('users',listUsers);
-                return []
+                    function sortFunction(a, b) {
+                        if (a[1] === b[1]) {
+                            return 0;
+                        }
+                        else {
+                            return (a[1] > b[1]) ? -1 : 1;
+                        }
+                    }                    
+                       
+                    //remove words that were mentioned less than 10 times or some other number
+                    for(var i=0; i<listOfWords.length;)
+                    {
+                        if(listOfWords[i][1]<100)
+                        {
+                            listOfWords.splice(i,1);
+                        }
+                        else{
+                            i++
+                        }
+                    }
+                sorted_words = listOfWords.sort(sortFunction);
+                console.log('sorted_words',sorted_words);
+
+                var word_out = [];
+                var count_out = [];
+                var users_out = [];
+
+                for (var i = 0; i < sorted_words.length; i++) {
+                    word_out.push(sorted_words[i][0]);
+                    count_out.push(sorted_words[i][1]);
+                    users_out.push(sorted_words[i][2]);
+
+                }
+                return [word_out,count_out,users_out];
                 //return data[month].users
             }
             
@@ -401,7 +445,7 @@
                         userY = wordY + 40*Math.sin(j/users[i].length*Math.PI*2);
                         //userDict[users[i][j]] = [userX,userY];
                         smallDict = {};
-                        smallDict['name'] = users[i][j];
+                        smallDict['name'] = String(users[i][j]);
                         smallDict['x'] =  userX;
                         smallDict['y'] =  userY;
                         userDict.push(smallDict);
