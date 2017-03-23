@@ -4,7 +4,6 @@
         <meta charset="utf-8">
         <title>User Classification</title>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
-		<script type="text/javascript" src="d3/d3.v3.js"></script>
         <style type="text/css">
 
 		</style>
@@ -36,6 +35,15 @@
 			}
 		}
             
+        function isItemInArray(array, item) {
+            for (var a = 0; a < array.length; a++) {
+                // This if statement depends on the format of your array
+                if (array[a][0] == item) {
+                    return a;   // Found it
+                }
+            }
+            return -1;   // Not found
+        }
 		
         d3.text("DEC_whole_month.txt", function(data) {
         
@@ -57,6 +65,7 @@
                 grouped[json_array[i].screen_name].push(json_array[i]);
             };
             
+            json_array = [];
             var group_of_users = Object.keys(grouped).map(function(k) { return grouped[k] });
                         
             console.log(group_of_users.length);
@@ -125,17 +134,17 @@
 			//create  relations
 			//*****************
 			
-			for (var i = 0; i < final_data.length;i++) { 
+			/*for (var i = 0; i < final_data.length;i++) { 
 			//cycle through users
 				//define popularity for size of the nodes
-				final_data[i]['popularity'] = final_data[i]['following']+final_data[i]['followers'];
+				//final_data[i]['popularity'] = final_data[i]['following']+final_data[i]['followers'];
 	
 				for(var j=0; j<final_data[i]['tweets'].length; j++){
 				//cycle through tweets
 					if(final_data[i]['tweets'][j]['hashtags'].length != 0){
 						for(var k=0; k<final_data[i]['tweets'][j]['hashtags'].length; k++){
 							listOfHashtags.push(final_data[i]['tweets'][j]['hashtags'][k]['text']);
-							console.log(final_data[i]['tweets'][j]['hashtags'][k]['text']);
+							//console.log(final_data[i]['tweets'][j]['hashtags'][k]['text']);
 						}
 					}
 					var mentionedUser = listOfUsers.indexOf(final_data[i]['tweets'][j]['in_reply_to_screen_name']);
@@ -157,11 +166,61 @@
 					relUser = counter(final_data[i]['related_users']);
 					final_data[i]['related_users'] = relUser;
 				}
-			};
-			final_data[0]['most_common_words'] = d3.entries(counter(listOfHashtags)).sort(keySort(d3.descending, "value"));
+			};*/
+            //I think we can have the most common words as a different variable rather than inside the array
+            //most_common_words = d3.entries(counter(listOfHashtags)).sort(keySort(d3.descending, "value"));
+			//final_data[0]['most_common_words'] = d3.entries(counter(listOfHashtags)).sort(keySort(d3.descending, "value"));
+            var stopwords = ["","a", "whose", "ever", "many", "much", "me", "will", "always", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any","are","aren't","as","at","be","because","been","before","being","below","between","both","but","by","can't","cannot","could","couldn't","did","didn't","do","does","doesn't","doing","don't","down","during","each","few","for","from","further","had","hadn't","has","hasn't","have","haven't","having","he","he'd","he'll","he's","her","here","here's","hers","herself","him","himself","his","how","how's","i","i'd","i'll","i'm","i've","if","in","into","is","isn't","it","it's","its","itself","let's","me","more","most","mustn't","my","myself","no","nor","not","of","off","on","once","only","or","other","ought","our","ours","ourselves","out","over","own","same","shan't","she","she'd","she'll","she's","should","shouldn't","so","some","such","than","that","that's","the","their","theirs","them","themselves","then","there","there's","these","they","they'd","they'll","they're","they've","this","those","through","to","too","under","until","up","very","was","wasn't","we","we'd","we'll","we're","we've","were","weren't","what","what's","when","when's","where","where's","which","while","who","who's","whom","why","why's","with","won't","would","wouldn't","you","you'd","you'll","you're","you've","your","yours","yourself","yourselves"];
+            var listOfWords = []
+            for(var i=0; i<final_data.length; i++){
+                for(var j=0; j<final_data[i]['tweets'].length;j++){
+                    var words =  final_data[i]['tweets'][j]['text'].split(" ");
+                    
+                    for(var t = 0; t<words.length; t++){
+                    
+                        if(!words[t].includes("@") && !words[t].toLowerCase().includes("rt") && !words[t].toLowerCase().includes("https")){
+                            var index = isItemInArray(listOfWords,words[t].toLowerCase());
+                            
+                            if(index == -1 && stopwords.indexOf(words[t].toLowerCase()) == -1){
+                                listOfWords.push([words[t].toLowerCase(),1]);
+                            }
+                            else if(index != -1 && stopwords.indexOf(words[t].toLowerCase()) == -1)
+                            {
+                                listOfWords[index][1]++;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            //remove words that were mentioned less than 10 times or some other number
+            for(var i=0; i<listOfWords.length;)
+            {
+                if(listOfWords[i][1]<40)
+                {
+                    listOfWords.splice(i,1);
+                }
+                else{
+                    i++
+                }
+            }
+            
+            //relations
+            var relation_list = []
+            for(var i=0; i<final_data.length; i++)
+            {
+                var user_index = listOfUsers.indexOf(final_data[i]['screen_name']);
+                for(var relation in final_data[i]['related_users']){
+                    var related_index = Number(relation);
+                    var count = final_data[i]['related_users'][relation];
+                    relation_list.push([user_index,related_index, count])
+                }
+            
+            }
 			
-			console.log(final_data[0]['most_common_words']);
+			//console.log(most_common_words);
 			//console.log(final_data);
+            console.log(relation_list[0])
             console.log("finished");
             
         });
