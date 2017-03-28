@@ -10,7 +10,11 @@ function createSideCharts(data) {
 	
 	//console.log(data);
 	
-	for (var i = 0; i < 10; i++) {
+	data[0]["most_common_words"].splice(20);
+	
+	console.log(data);
+	
+	for (var i = 0; i < data[0]["most_common_words"].length; i++) {
 				wordList.push(data[0]["most_common_words"][i]['key']);
 			}
 	
@@ -35,7 +39,25 @@ function createSideCharts(data) {
 	var xAxisTime = d3.svg.axis().scale(xScaleTime).orient("bottom");
 	var yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(5);
 	
+	var bars = svg.selectAll("rect")
+    .data(data[0]['most_common_words'])
+    .enter()
+    .append("rect");
 	
+	bars.attr("height","0")
+		.attr("width", ((w-(paddingX*2)) / 21)- barPadding*2)
+		.attr("x", function(d, i) {
+			//return (i * ((w-(paddingX*2)) / 20))+paddingX;
+			return (xScale(d['key']));
+		}).attr("height", function(d) {
+			return (((h/2)-(paddingY*4))-yScale(d['value']));
+		}).attr("y", function(d) {
+			return (yScale(d['value']));
+		}).attr("fill", function(d) {
+			return "rgba(200, 0, 128, 1)";
+		});
+	
+	//initialize Axis'
 	svg.append("g").attr("class", "axis")
 		.attr("transform", "translate(0," + ((h/2)-(paddingY*4)) + ")")
 		.call(xAxis)
