@@ -123,7 +123,8 @@
 	                    	wordClickList = wordClickList.sort();
 	                    	var naming = wordClickList.join(' & ') ;
 	                    	//Check if the combination isn't already present in database, if not: add
-	                    	if(data[month].words.indexOf(naming)<0 && wordClickList.length>0){
+	                    	//&& naming.split(' & ').length <3 added to avoid bugs with >2 elements disjoining
+	                    	if(data[month].words.indexOf(naming)<0 && wordClickList.length>0 && naming.split(' & ').length <3 ){
 	                    		data[month].words.push(naming);
 
 	                    		wordSubgroupList = []
