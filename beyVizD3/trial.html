@@ -2,11 +2,12 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" type="text/css" href="../Visualization/KindaBlack.css"></link>
+        <link rel="stylesheet" type="text/css" href="KindaBlack.css"></link>
 
         <title>Demo</title>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
 		<script type="text/javascript" src="d3/d3.v3.js"></script>
+		<script type="text/javascript" src="createSideCharts.js"></script>
         <style type="text/css">
 
 		</style>
@@ -138,19 +139,20 @@
 					final_data[i]['related_users'] = relUser;
 				}
 			};
+			
             //*******************END FIDING RELATIONS*************************//
             
             //GET MOST COMMON WORDS AS HASHTAGS
 			final_data[0]['most_common_words'] = d3.entries(counter(listOfHashtags)).sort(keySort(d3.descending, "value"));
-			
+			createSideCharts(final_data);
             console.log("Preprocessing finished");
             
             /*
             VISUALISATION PART
             */
 
-            var w = 1200;
-            var h = 1200;
+            var w = 1000;
+            var h = 1000;
             var padding = 200;
             var wordClickList = [];
             //FIX THIS LATER!!
