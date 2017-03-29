@@ -6,7 +6,7 @@
 body{
 	background-color: #00000A;
 	text-transform: uppercase;
-	color: #E8BCD5;
+	color: #f6f7f0;
 }
 
 div.temp{
@@ -38,13 +38,19 @@ div.temp{
 
 .title {
   font: 300 38px Oswald;
-  fill: #E8BCD5;
+  fill: #f6f7f0;
 }
 
 .groups {
   font: 300 30px Oswald;
-  fill: #4a8cb8;
+  fill: #d1d1da;
+}
+
+.groups:hover {
+  fill: #f6f7f0;
 } 
+
+
 
 .users {
 	fill: #f6f7f0;
@@ -61,7 +67,16 @@ div.temp{
 
 .relations {
 	stroke: #f6f7f0;
+	opacity: 0.3;
 	shape-rendering: auto;
+}
+
+.nav {
+	fill: #f6f7f0;	
+}
+
+.nav:hover{
+	fill: #367580;
 }
 
 footer {

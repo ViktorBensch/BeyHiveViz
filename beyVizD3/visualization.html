@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" type="text/css" href="../Visualization/KindaBlack.css"></link>
+        <link rel="stylesheet" type="text/css" href="KindaBlack.css"></link>
 
         <title>Demo</title>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
@@ -152,8 +152,8 @@
             VISUALISATION PART
             */
 
-            var w = 1200;
-            var h = 1200;
+            var w = 1000;
+            var h = 1000;
             var padding = 200;
             var wordClickList = [];
             //FIX THIS LATER!!
@@ -378,12 +378,12 @@
                     
                 //My first useless little test point
                 var point1 = svg.append("circle")
+					.attr("class","nav")
                     .attr("cx",h/2)
                     .attr("cy",w/2 - 100)
                     .attr("r",5)
                     .attr("user",'Stranger')
                     .attr("Tag",'None')
-                    .attr("fill","#205454")
                     .on("click", function(){
                         month = update(data,month+1);
 
@@ -391,12 +391,12 @@
                     
                 //My second useless little test point
                 var point2 = svg.append("circle")
+					.attr("class","nav")
                     .attr("cx",h/2)
                     .attr("cy",w/2 + 100)
                     .attr("r",5)
                     .attr("user",'Loner')
                     .attr("Tag",'None')
-                    .attr("fill","#205454")
                     .on("click", function(){
                         month = update(data,month-1);
                     });     
@@ -511,29 +511,35 @@
                     if(tweet_count<10){
                       d3.selectAll('svg')
                         .append('image')
-                        .attr("xlink:href", "icons/bee.png")
+                        //.attr("xlink:href", "icons/bee.png")
+						.attr("xlink:href", "icons/icons_02.png")
                         .attr("x", dataset[i].x)
                         .attr("y", dataset[i].y)
-                        .attr("width", 15)
-                        .attr("height", 15);
+                        .attr("width", 25)//was 15
+                        .attr("height", 25)
+						.attr("transform", "translate(-13,-13)");
                     }
                     else if(tweet_count>=10 && tweet_count<35){
                         d3.selectAll('svg')
                         .append('image')
-                        .attr("xlink:href", "icons/honey.png")
+                        //.attr("xlink:href", "icons/honey.png")
+						.attr("xlink:href", "icons/icons_01.png")
                         .attr("x", dataset[i].x)
                         .attr("y", dataset[i].y)
                         .attr("width", 30)
-                        .attr("height", 30);                
+                        .attr("height", 30)
+						.attr("transform", "translate(-15, -15)");                
                     }
                     else if(tweet_count>=35){
                         d3.selectAll('svg')
                         .append('image')
-                        .attr("xlink:href", "icons/crown.png")
+                        //.attr("xlink:href", "icons/crown.png")
+						.attr("xlink:href", "icons/icons_03.png")
                         .attr("x", dataset[i].x)
                         .attr("y", dataset[i].y)
-                        .attr("width", 50)
-                        .attr("height", 50);               
+                        .attr("width", 35)//was 50
+                        .attr("height", 35)
+						.attr("transform", "translate(-18, -18)");               
                     }
                 
                 }
