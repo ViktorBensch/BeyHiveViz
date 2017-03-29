@@ -326,17 +326,20 @@
                     var userXsum = 0;
                     var userYsum = 0;
                     var count = 0;
+                    var usedWords = [];
                     if(userIndexDict.indexOf(users[j][k]) == -1){
                         for(word_place = 0; word_place<words.length; word_place++){
                             if(users[word_place].indexOf(users[j][k]) != -1)
-                            {
-                                
+                            {       
+                                    usedWords.push(words[word_place]);
+
                                     //add x value to x sum
                                     userXsum = userXsum + word_coordinates[word_place][0];
                                     //add y value to y sum
                                     userYsum = userYsum + word_coordinates[word_place][1];
                                     //increment count
                                     count += 1;
+                                    
                                 
                             }
                         }
@@ -344,6 +347,8 @@
                         smallDict = {};
                         smallDict['x'] =  userXsum/count;
                         smallDict['y'] =  userYsum/count;
+                        smallDict['usedWords'] = usedWords;
+                        console.log('word used ', usedWords)
                         userDict.push(smallDict);
                         userIndexDict.push(users[j][k]);
                     }
@@ -384,7 +389,24 @@
                     .attr("y", dataset[i].y)
                     .attr("width", 25)//was 15
                     .attr("height", 25)
-                    .attr("transform", "translate(-13,-13)");
+                    .attr("transform", "translate(-13,-13)")
+                    .attr('words', dataset[i].usedWords)
+                    .on("mouseover", function(d){
+                        var xPos = parseFloat(d3.select(this).attr("x"));
+                        var yPos = parseFloat(d3.select(this).attr("y"));
+                        var wUsed =  (d3.select(this).attr("words"))
+                        svg.append("text")
+                          .attr("id", "tooltip")
+                          .attr("x", xPos)
+                          .attr("y", yPos)
+                          .attr("class", "usersText")
+                          .attr("text-anchor", "middle")
+                          .text(wUsed);
+                    })
+                    .on("mouseout", function() {
+                        //Remove the tooltip
+                        d3.select("#tooltip").remove();
+                    });
                 }
                 else if(tweet_count>=10 && tweet_count<35){
                     d3.selectAll('svg')
@@ -395,7 +417,24 @@
                     .attr("y", dataset[i].y)
                     .attr("width", 30)
                     .attr("height", 30)
-                    .attr("transform", "translate(-15, -15)");                
+                    .attr("transform", "translate(-15, -15)")
+                    .attr('words', dataset[i].usedWords)
+                    .on("mouseover", function(d){
+                        var xPos = parseFloat(d3.select(this).attr("x"));
+                        var yPos = parseFloat(d3.select(this).attr("y"));
+                        var wUsed =  (d3.select(this).attr("words"))
+                        svg.append("text")
+                          .attr("id", "tooltip")
+                          .attr("x", xPos)
+                          .attr("y", yPos)
+                          .attr("class", "usersText")
+                          .attr("text-anchor", "middle")
+                          .text(wUsed);
+                    })
+                    .on("mouseout", function() {
+                        //Remove the tooltip
+                        d3.select("#tooltip").remove();
+                    });                
                 }
                 else if(tweet_count>=35){
                     d3.selectAll('svg')
@@ -406,7 +445,24 @@
                     .attr("y", dataset[i].y)
                     .attr("width", 35)//was 50
                     .attr("height", 35)
-                    .attr("transform", "translate(-18, -18)");               
+                    .attr("transform", "translate(-18, -18)")
+                    .attr('words', dataset[i].usedWords)
+                    .on("mouseover", function(d){
+                        var xPos = parseFloat(d3.select(this).attr("x"));
+                        var yPos = parseFloat(d3.select(this).attr("y"));
+                        var wUsed =  (d3.select(this).attr("words"))
+                        svg.append("text")
+                          .attr("id", "tooltip")
+                          .attr("x", xPos)
+                          .attr("y", yPos)
+                          .attr("class", "usersText")
+                          .attr("text-anchor", "middle")
+                          .text(wUsed);
+                    })
+                    .on("mouseout", function() {
+                        //Remove the tooltip
+                        d3.select("#tooltip").remove();
+                    });               
                 }
             
             }
