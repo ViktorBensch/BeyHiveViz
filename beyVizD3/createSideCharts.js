@@ -1,61 +1,59 @@
-function createSideCharts(data) {
+function createSideCharts(dataW, dataC) {
 	w = 300;
-    h = 800;
+    h = 600;
+	
 	wordList = [];
 	
 	var barPadding = 1;
 	var padding = 2;
 	var paddingY = 25;
-	var paddingX = 25;
+	var paddingX = 35;
 	
 	//console.log(data);
 	
-	data[0]["most_common_words"].splice(20);
+	dataW.splice(20);
+	dataC.splice(20);
+	dataW.splice(0,1);
+	dataC.splice(0,1);
 	
-	console.log(data);
+	for(i=0;i<dataW.length;i++)
+    {
+        wordList.push([dataW[i],dataC[i]]);
+    }
 	
-	for (var i = 0; i < data[0]["most_common_words"].length; i++) {
-				wordList.push(data[0]["most_common_words"][i]['key']);
-			}
+
+	
+	//console.log(data);
 	
 	var yScale = d3.scale.linear()
-		.domain([data[0]["most_common_words"][0]['value'],0])
+		.domain([dataC[0],0])
         .range([paddingY, (h/2)-(paddingY*4)]);
 	var xScale = d3.scale.ordinal()
-        .domain(wordList) 
+        .domain(dataW) 
 		.rangeRoundBands([paddingX,w-paddingX]);
-	var xScaleTime = d3.scale.linear()
-        .domain([0,31]) 
-		.range([paddingX,w-paddingX]);
+	//var xScaleTime = d3.scale.linear().domain([0,31]).range([paddingX,w-paddingX]);
 					 
-	var svg = d3.select("body")
-		.append("svg")
-		.data(data)
-        .attr("width", w)
-        .attr("height", h)
-	;
+
 		
 	var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
-	var xAxisTime = d3.svg.axis().scale(xScaleTime).orient("bottom");
 	var yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(5);
+	//var xAxisTime = d3.svg.axis().scale(xScaleTime).orient("bottom");
 	
 	var bars = svg.selectAll("rect")
-    .data(data[0]['most_common_words'])
+    .data(wordList)
     .enter()
     .append("rect");
 	
 	bars.attr("height","0")
-		.attr("width", ((w-(paddingX*2)) / 21)- barPadding*2)
+		.attr("width", ((w-(paddingX*2)) / (wordList.length+1))- barPadding*2)
 		.attr("x", function(d, i) {
 			//return (i * ((w-(paddingX*2)) / 20))+paddingX;
-			return (xScale(d['key']));
+			return (xScale(d[0])+(barPadding*2));
 		}).attr("height", function(d) {
-			return (((h/2)-(paddingY*4))-yScale(d['value']));
+			return (((h/2)-(paddingY*4))-yScale(d[1]));
 		}).attr("y", function(d) {
-			return (yScale(d['value']));
-		}).attr("fill", function(d) {
-			return "rgba(200, 0, 128, 1)";
-		});
+			return (yScale(d[1]));
+		}).attr("fill","rgba(35, 80, 143, 1)");
 	
 	//initialize Axis'
 	svg.append("g").attr("class", "axis")
@@ -72,11 +70,6 @@ function createSideCharts(data) {
 		.attr("transform", "translate(" + paddingX + ",0)")
 		.call(yAxis);
 		
-	svg.append("g").attr("class", "axis")
-		.attr("transform", "translate(0," + (h-paddingY) + ")")
-		.call(xAxisTime);
-
-	svg.append("g").attr("class", "axis")
-		.attr("transform", "translate(" + paddingX + ","+((h/2)+(paddingY*3))+")")
-		.call(yAxis);
+	//svg.append("g").attr("class", "axis").attr("transform", "translate(0," + (h-paddingY) + ")").call(xAxisTime);
+	//svg.append("g").attr("class", "axis").attr("transform", "translate(" + paddingX + ","+((h/2)+(paddingY*3))+")").call(yAxis);
 }
