@@ -15,18 +15,35 @@
 		</style>
     </head>
     <body>
+    <div id="option">
+        <input name="resetButton" 
+               type="button" 
+               value="reset" 
+               onclick="reset()" />
+        </div>
+        
+        <div id="option">
+        <input name="custom" 
+               type="button" 
+               value="enter custom inputs" 
+               onclick="submit()" />
+        </div>
+        <button onclick="submit();" href="javascript:;">custom input</button>
+        
         <script type="text/javascript">
 		
-        var month_list = {11: 'november_data.txt',12: 'december_data.txt', 13: 'january_data.txt'};
-        var month = 11;
+        var month_list = {11: 'data/november_data.txt',12: 'data/december_data.txt', 13: 'data/january_data.txt'};
+        var month = 12;
         var input_file = month_list[month];
-
-        var listOfUsers = [];
-        var listOfHashtags = [];
-        var final_data = []
+        var data_word = [];
+        var data_count = [];
+        var data_users = [];
+        var remaining_users = [];
+        var rank = [];
+        var topRelations = [];
         
-        var w = 1000;
-        var h = 1000;
+        var w = 1200;
+        var h = 1200;
         var padding = 200;
         var wordClickList = [];
         //FIX THIS LATER!!
@@ -56,8 +73,8 @@
         }
                        
         //*****************VISUALISATION FUNCTIONS**********//
-       
-        //add middle elements
+
+/*      //add middle elements
         function restElems(){
             //Add title in center
             var word = svg.append("text")
@@ -120,9 +137,107 @@
                 .on("click", function(){
                     month = update(data,month-1);
                 });     
+        }*/
+        //add middle elements
+        function restElems(){
+            //Add title in center
+            var word = svg.append("text")
+                .attr("class","title")
+                .attr("y", h/2)
+                .attr("x", w/2 )
+                .attr("text-anchor", "middle")
+                .text("Bey")
+                .on("click", function(){
+                    var temp_data_word = data_word.slice(0);
+                    var temp_data_users = data_users.slice(0);
+                    //Add the word-groups together
+                    wordClickList = wordClickList.sort();
+                    var naming = wordClickList.join(' & ') ;
+                    //Check if the combination isn't already present in database, if not: add
+
+                    //if(data[month].words.indexOf(naming)<0 && wordClickList.length>0){
+                    if( temp_data_word.indexOf(naming) === -1 && wordClickList.length ===2 ){
+                        temp_data_word.push(naming);
+
+                        usersOfWordClickList = [];
+                        //remove added element from origal word-array and user-array
+                        for (var i = 0; i < wordClickList.length; i++) {
+
+                            //Add users to new word-group
+                            indexUser = temp_data_word.indexOf(wordClickList[i]);
+
+                            temp_data_word.splice(temp_data_word.indexOf(wordClickList[i]),1);
+
+                            usersOfWordClickList = usersOfWordClickList.concat(temp_data_users[indexUser]);
+                            temp_data_users.splice(indexUser,1);
+                            //data[month].users.splice(data[month].users.indexOf(userGroup),1)
+                        }
+                        //Add new user data
+                        temp_data_users.push(usersOfWordClickList);
+
+                        svg.selectAll('text.groups').remove();
+                        svg.selectAll('image').remove();
+                        svg.selectAll('line').remove();
+
+                        //Needed?
+                        //var topRelations = getRelations(data,month,remaining_users);
+                       /*Updates */
+                        mapWords(temp_data_word,w,h);
+
+                        //HOW TO DO USER-MAPPING IN NEW MODEL?
+                        [userLocations, usersIndexes] = mapUsers(temp_data_word,temp_data_users,w,h);
+                        console.log('step1')
+                        createCircles(userLocations,usersIndexes,rank);
+                        console.log('step2')
+                        mapRelations(topRelations,usersIndexes,userLocations);
+
+                    //If one word to be torn apart
+                    /*
+                    }else if (naming.split(' & ')>wordClickList){
+                        names = naming.split(' & ');
+                        data_word.splice(data_word.indexOf(naming),1)
+                        for (var i = 0; i < names.length; i++) {
+                            data_word.push(names[i])
+                        }
+                        console.log("You're tearing me apart Lisa!")
+                        //svg.selectAll('text.groups').remove();
+                        //mapWords(data_word,w,h);
+
+                    */
+                    }
+
+                    //update(data,month);
+                    wordClickList = [];
+                    temp_data_word = [];
+                    temp_data_users = [];
+                }); 
+                
+            //My first useless little test point
+            var point1 = svg.append("circle")
+                .attr("cx",h/2)
+                .attr("cy",w/2 - 100)
+                .attr("r",5)
+                .attr("user",'Stranger')
+                .attr("Tag",'None')
+                .attr("fill","#205454")
+                .on("click", function(){
+                    month = update(data,month+1);
+                });
+                
+            //My second useless little test point
+            var point2 = svg.append("circle")
+                .attr("cx",h/2)
+                .attr("cy",w/2 + 100)
+                .attr("r",5)
+                .attr("user",'Loner')
+                .attr("Tag",'None')
+                .attr("fill","#205454")
+                .on("click", function(){
+                    month = update(data,month-1);
+                });     
         }
-        
-        //Place the top words in the correct location in the svg
+       
+/*      //Place the top words in the correct location in the svg
         function mapWords(words,w,h){
             //var padding = 100;
             cx = w/2;
@@ -151,6 +266,40 @@
                         wordClickList.push(d3.select(this).text());
                     }
                 });
+        }*/
+        //Place the top words in the correct location in the svg
+        function mapWords(words,w,h){
+            //var padding = 100;
+            cx = w/2;
+            cy = h/2;
+            radius = Math.min(cx,cy) - padding;     
+            svg.selectAll("text.groups")
+                .data(words)
+                .enter()
+                .append("text")
+                .text(function(d) {
+                    return d;
+                })
+                .attr("class","groups")
+                .attr("text-anchor", "middle")
+                .attr("x", function(d, i) {
+                    return cx + radius*Math.cos(i/words.length*Math.PI*2);
+                })
+                .attr("y", function(d,i) {
+                    return cy + radius*Math.sin(i/words.length*Math.PI*2);
+                })
+                .on("click", function(){
+                    wordIndex = wordClickList.indexOf(d3.select(this).text());
+                    if(wordIndex>-1){
+                        wordClickList.splice(wordIndex,1);
+                    }else{
+                        wordClickList.push(d3.select(this).text());
+                        if (wordClickList.length >1){
+                            console.log('Ready to merge!', wordClickList);
+                            //d3.select(svg.title.text('Merge'));
+                        }
+                    }
+                })
         }
         
         //Place the users in the correct location in the svg
@@ -261,7 +410,6 @@
                 }
             
             }
-        
         
             /*svg.selectAll("circle.users")
                 .data(dataset)
@@ -388,7 +536,7 @@
 
         d3.text(input_file, function(data) {
                 
-            var [data_word,data_count,data_users,remaining_users,rank,topRelations] = dataParser(data);
+            [data_word,data_count,data_users,remaining_users,rank,topRelations] = dataParser(data);
             console.log("Parsing finished");
             
             //Map the data onto the visualization
@@ -411,7 +559,18 @@
 
         });
         
-        
+        //reset visualization to default version before combinations
+        function reset(){
+            console.log("resetting");
+            d3.selectAll("svg > *").remove();
+            
+            mapWords(data_word,w,h);
+            [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
+            mapRelations(topRelations,usersIndexes,userLocations);
+            createCircles(userLocations,usersIndexes,rank);
+
+            restElems();
+        }
         
         //Create additional update that puts user-word groups together
         function update(month){
@@ -436,7 +595,7 @@
 
                 d3.text(input_file, function(data) {
                         
-                    var [data_word,data_count,data_users,remaining_users,rank,topRelations] = dataParser(data);
+                    [data_word,data_count,data_users,remaining_users,rank,topRelations] = dataParser(data);
                     console.log("Parsing finished");
                     
                     //Map the data onto the visualization
@@ -456,7 +615,9 @@
             }
         }
 
-        
+        function submit(){
+            window.location.assign("user_demo.html");
+        }
         </script>
         
     </body>
