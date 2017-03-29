@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <link rel="stylesheet" type="text/css" href="KindaBlack.css"></link>
 
-        <title>Demo</title>
+        <title>Visualization Beyonce Fanbase</title>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
 		<script type="text/javascript" src="d3/d3.v3.js"></script>
         <style type="text/css">
@@ -17,6 +17,10 @@
     <body>
         <script type="text/javascript">
 		
+        var month_list = {11: 'november_data.txt',12: 'december_data.txt', 13: 'january_data.txt'};
+        var month = 11;
+        var input_file = month_list[month];
+
         var listOfUsers = [];
         var listOfHashtags = [];
         var final_data = []
@@ -28,7 +32,6 @@
         //FIX THIS LATER!!
         var breakUpList = {10:{},11:{}};
 
-        var month = 10
         var tooltip = d3.select("body")
             .append("div")
             .style("position", "absolute")
@@ -40,248 +43,20 @@
             .append("svg")
             .attr("width", w)
             .attr("height", h);
-        
+
         //****************UTILITY FUNCTIONS****************//
-		//used to count occurences inside the given array, returns an object		
-		function counter(cArray){
-			var obj = { };
-			for (var i = 0; i < cArray.length; i++) {
-				obj[cArray[i]] = (obj[cArray[i]] || 0) + 1;
-			}
-			//console.log(obj);
-			return obj;
-		};
-		
-		//only used to make the hashtags sortable
-		function keySort(sortfunc, field){
-			return function(a, b){
-				return sortfunc(a[field], b[field]);
-			}
-		}
-        
-        //pretty slef explanatory
-        function isItemInArray(array, item) {
-            for (var a = 0; a < array.length; a++) {
-                // This if statement depends on the format of your array
-                if (array[a][0] == item) {
-                    return a;   // Found it
-                }
+        //delete empty element
+        function finalize(array){
+            var index = array.indexOf("");
+            while(index!=-1){
+                array.splice(index,1);
+                index = array.indexOf("");
             }
-            return -1;   // Not found
+            return array;        
         }
-        //**************************************************//
-        
+                       
         //*****************VISUALISATION FUNCTIONS**********//
-        
-        //parse file
-        function preprocessing(data){
-            var array = data.split("\n");
-            var json_array = []
-            for (var i = 0; i < array.length-1; i++) { 
-                json_array.push(JSON.parse(array[i]));
-            }
-            data = ""
-            array = [];
-            
-            grouped = {};
-
-            //write tweets in groups of users
-            for (var i = 0; i < json_array.length; i++) { 
-                grouped[json_array[i].screen_name] = grouped[json_array[i].screen_name] || [];
-                grouped[json_array[i].screen_name].push(json_array[i]);
-            };
-            
-            var group_of_users = Object.keys(grouped).map(function(k) { return grouped[k] });
-                        
-            //eliminate the tweets from users that are not popular            
-            for (var i = 0; i < group_of_users.length;) { 
-                    if(group_of_users[i][0]['followers']<5000)
-                    {
-                        group_of_users.splice(i,1);
-                    }
-                    else
-                    {
-                        listOfUsers.push(group_of_users[i][0]['screen_name']);
-                        i++;
-                    }
-            };      
-            
-            //create the main data structure to be used
-            
-            for(var i = 0; i<group_of_users.length; i++)
-            {
-                final_data.push({
-                    screen_name: group_of_users[i][0]['screen_name'],
-                    location: group_of_users[i][0]['user_location'],
-                    followers: group_of_users[i][0]['followers'],
-                    following: group_of_users[i][0]['following'],
-                    tweet_count: group_of_users[i].length, 
-                    tweets: [],
-                    related_users: []
-                });
-                for(var j = 0; j<group_of_users[i].length; j++){
-                    final_data[i]['tweets'].push({
-                        text: group_of_users[i][j]['text'],
-                        timestamp: group_of_users[i][j]['timestamp'],
-                        hashtags: group_of_users[i][j]['hashtags'],
-                        user_mentions: group_of_users[i][j]['user_mentions'],
-                        in_reply_to_screen_name: group_of_users[i][j]['in_reply_to_screen_name']
-                    });
-                    //final_data[i]['related_users'].push(group_of_users[i][j]['in_reply_to_screen_name']);
-                    //related_arr.push(group_of_users[i][j]['in_reply_to_screen_name']);
-                }
-            }
-            
-            group_of_users = []
-            
-            //We only have people with more than 10.000 followers.
-            //*******************END READ DATA***************************//
-            
-            
-            
-            //*******************FINDING RELATIONS***********************//			
-            for (var i = 0; i < final_data.length;i++) { 
-            //cycle through users
-                //define popularity for size of the nodes
-                final_data[i]['popularity'] = final_data[i]['following']+final_data[i]['followers'];
-    
-                for(var j=0; j<final_data[i]['tweets'].length; j++){
-                //cycle through tweets
-                    if(final_data[i]['tweets'][j]['hashtags'].length != 0){
-                        for(var k=0; k<final_data[i]['tweets'][j]['hashtags'].length; k++){
-                            listOfHashtags.push(final_data[i]['tweets'][j]['hashtags'][k]['text']);
-                            //console.log(final_data[i]['tweets'][j]['hashtags'][k]['text']);
-                        }
-                    }
-                    var mentionedUser = listOfUsers.indexOf(final_data[i]['tweets'][j]['in_reply_to_screen_name']);
-                    if (mentionedUser != -1){ 
-                        final_data[i]['related_users'].push(mentionedUser);
-                    }
-                    for(var k=0; k<final_data[i]['tweets'][j]['user_mentions'].length; k++){
-                    //cycle through mentions
-                        if(final_data[i]['tweets'][j]['user_mentions'][k] != 0){
-                            var mentionedUser = listOfUsers.indexOf(final_data[i]['tweets'][j]['user_mentions'][k]['screen_name']);
-                            
-                            if (mentionedUser != -1){
-                                final_data[i]['related_users'].push(mentionedUser);
-                            }
-                        }
-                    }
-                }
-                if (final_data[i]['related_users'].length != 0){
-                    relUser = counter(final_data[i]['related_users']);
-                    final_data[i]['related_users'] = relUser;
-                }
-            };
-            //*******************END FIDING RELATIONS*************************//
-            
-            //GET MOST COMMON WORDS AS HASHTAGS
-            //final_data[0]['most_common_words'] = d3.entries(counter(listOfHashtags)).sort(keySort(d3.descending, "value"));
-        }
-    
-        //create mainly used data structures
-        function getTopData(){
-            //EXTRACT FROM DATAFILE!! FIX THIS LATER!!
-            //*******************GET MOSTLY USED WORDS WITH USERS AND COUNTS********************//
-            var stopwords = ["-","","a", "whose", "ever", "many", "much", "me", "will", "always", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any","are","aren't","as","at","be","because","been","before","being","below","between","both","but","by","can't","cannot","could","couldn't","did","didn't","do","does","doesn't","doing","don't","down","during","each","few","for","from","further","had","hadn't","has","hasn't","have","haven't","having","he","he'd","he'll","he's","her","here","here's","hers","herself","him","himself","his","how","how's","i","i'd","i'll","i'm","i've","if","in","into","is","isn't","it","it's","its","itself","let's","me","more","most","mustn't","my","myself","no","nor","not","of","off","on","once","only","or","other","ought","our","ours","ourselves","out","over","own","same","shan't","she","she'd","she'll","she's","should","shouldn't","so","some","such","than","that","that's","the","their","theirs","them","themselves","then","there","there's","these","they","they'd","they'll","they're","they've","this","those","through","to","too","under","until","up","very","was","wasn't","we","we'd","we'll","we're","we've","were","weren't","what","what's","when","when's","where","where's","which","while","who","who's","whom","why","why's","with","won't","would","wouldn't","you","you'd","you'll","you're","you've","your","yours","yourself","yourselves"];
-                var listOfWords = []
-                listOfWords.push(["beyoncé",0,[]]);
-                for(var i=0; i<final_data.length; i++){
-                   for(var j=0; j<final_data[i]['tweets'].length;j++){
-                       var words =  final_data[i]['tweets'][j]['text'].split(" ");
-                       for(var t = 0; t<words.length; t++){
-                            if(stopwords.indexOf(words[t].toLowerCase()) == -1 && !words[t].includes("&") && !words[t].includes("@") && !words[t].toLowerCase().includes("rt") && !words[t].toLowerCase().includes("https")){
-                                if(words[t].toLowerCase().includes("beyonc"))
-                                {
-                                    listOfWords[0][1]++;
-                                    if(listOfWords[0][2].indexOf(i) == -1){
-                                            listOfWords[0][2].push(i);
-                                        }
-                                }
-                                else{
-                                    var index = isItemInArray(listOfWords,words[t].toLowerCase());
-                                   
-                                    if(index == -1){
-                                       listOfWords.push([words[t].toLowerCase(),1,[i]]);
-                                    }
-                                    else if(index != -1)
-                                    {
-                                        listOfWords[index][1]++;
-                                        if(listOfWords[index][2].indexOf(i) == -1){
-                                            listOfWords[index][2].push(i);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                function sortFunction(a, b) {
-                    if (a[1] === b[1]) {
-                        return 0;
-                    }
-                    else {
-                        return (a[1] > b[1]) ? -1 : 1;
-                    }
-                }                    
-                   
-                //remove words that were mentioned less than 10 times or some other number
-                for(var i=0; i<listOfWords.length;)
-                {
-                    if(listOfWords[i][1]<100)
-                    {
-                        listOfWords.splice(i,1);
-                    }
-                    else{
-                        i++
-                    }
-                }
-            sorted_words = listOfWords.sort(sortFunction);
-            //console.log('sorted_words',sorted_words);
-
-            var word_out = [];
-            var count_out = [];
-            var users_out = [];
-            var us = [];
-
-            for (var i = 0; i < sorted_words.length; i++) {
-                word_out.push(sorted_words[i][0]);
-                count_out.push(sorted_words[i][1]);
-                users_out.push(sorted_words[i][2]);
-                
-                for(var k = 0; k<sorted_words[i][2].length;k++){
-                    if(us.indexOf(sorted_words[i][2][k]) == -1)
-                    {
-                        us.push(sorted_words[i][2][k]);
-                    }
-                }
-            }
-            return [word_out,count_out,users_out,us];
-            //return data[month].users
-        }
-                    
-        //find relations and write to separate var                 
-        function getRelations(data,month,remaining_users){
-             var relation_list = []
-            for(var i=0; i<final_data.length; i++)
-            {
-                var user_index = listOfUsers.indexOf(final_data[i]['screen_name']);
-                if(remaining_users.indexOf(user_index)!=-1){
-                    for(var relation in final_data[i]['related_users']){
-                        var related_index = Number(relation);
-                        if(remaining_users.indexOf(related_index)!=-1){
-                            var count = final_data[i]['related_users'][relation];
-                            relation_list.push([user_index,related_index,count]);
-                        }
-                    }
-                }
-           
-            }
-            return relation_list;
-            //return data[month].relations
-        }
-                    
+       
         //add middle elements
         function restElems(){
             //Add title in center
@@ -375,7 +150,7 @@
                     }else{
                         wordClickList.push(d3.select(this).text());
                     }
-                })
+                });
         }
         
         //Place the users in the correct location in the svg
@@ -394,8 +169,6 @@
                 wordY = cy + radius*Math.sin(i/words.length*Math.PI*2);
                 word_coordinates.push([wordX,wordY]);
             }
-            
-            console.log('heloy');
             
             for(j= 0; j<users.length;j++){
             //for every word
@@ -449,10 +222,10 @@
         }
         
         //Places circles on the svg
-        function createCircles(dataset,indexes){
+        function createCircles(dataset,indexes,rank){
         
             for(var i=0;i<dataset.length; i++){
-                var tweet_count = final_data[indexes[i]]['tweet_count'];
+                var tweet_count = Number(rank[i]);
                 if(tweet_count<10){
                   d3.selectAll('svg')
                     .append('image')
@@ -550,7 +323,7 @@
                     var ui = userIndexes.indexOf(d[0]);
                     if(ui != -1){
                         var y1 = userLocations[ui].y;
-                        console.log('y1/',i,': ',y1);
+                        //console.log('y1/',i,': ',y1);
                         return y1;
                     }
                     else{return 0;}
@@ -572,28 +345,57 @@
         }
         //************************************************//
         
-        d3.text("DEC_whole_month.txt", function(data) {
-        //****************READ DATA****************//
-        
-            preprocessing(data);
-            console.log("Preprocessing finished");
+        function dataParser(data){
+            var data_w = [];
+            var data_c = [];
+            var data_u = [];
+            var remaining_u = [];
+            var rank = [];
+            var topRel = [];
             
-            /*
-            VISUALISATION PART
-            */
+            var split = data.split("/")
+            
+            data_w = split[0].split(",");
+            data_c = split[1].split(",");
+            data_u = split[2].split("\n");
+            remaining_u = split[3].split(",")
+            rank = split[4].split(",");
+            topRel = split[5].split("\n");
+            
+            finalize(data_w);
+            finalize(data_c);
+            finalize(data_u);
+            finalize(remaining_u);
+            finalize(rank);
+            finalize(topRel);
+            
+            for(var i=0; i<data_u.length;i++){
+                var arr = data_u[i].split(",");
+                finalize(arr);
+                data_u[i] = arr;
+            }
+            
+            for(var j=0; j<topRel.length;j++){
+                var arr = topRel[j].split(",");
+                finalize(arr);
+                topRel[j] = arr;
+            }
+        
+        
+            return [data_w,data_c,data_u,remaining_u,rank,topRel];
+        }
+        
 
-            //return array len3: [ name,count,[[users],[],...],[remaining_users,...]]
-            //returns also the reminder users that were left in the system after the elimination of some words
-            var [data_word,data_count,data_users,remaining_users] = getTopData();
-
-            var topRelations = getRelations(data,month,remaining_users);
-            //console.log('relations', topRelations);
+        d3.text(input_file, function(data) {
+                
+            var [data_word,data_count,data_users,remaining_users,rank,topRelations] = dataParser(data);
+            console.log("Parsing finished");
+            
             //Map the data onto the visualization
-
             mapWords(data_word,w,h);
             [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
-            createCircles(userLocations,usersIndexes);
             mapRelations(topRelations,usersIndexes,userLocations);
+            createCircles(userLocations,usersIndexes,rank);
 
             restElems();
 
@@ -604,42 +406,53 @@
                   case 37: month -= 1; break;
                   case 39: month += 1; break;
                 }
-                month = update(data,month);
+                month = update(month);
             }); 
-            
-         
 
         });
         
+        
+        
         //Create additional update that puts user-word groups together
-        function update(data,month){
+        function update(month){
             //Range of data hard-coded. FIX THIS LATER!!
-            if(month > 11){
+            if(month > 13){
+                month = 13;
+                return month;
+            }
+            else if (month< 11){
                 month = 11;
                 return month;
             }
-            else if ( month< 10){
-                month = 10;
-                return month;
-            }
             else{
+                input_file = month_list[month]; 
+                
                 //Remove old elements
-                svg.selectAll('text').remove();
-                svg.selectAll('circle').remove();
-                svg.selectAll('line').remove();
-
-                restElems();
+                d3.selectAll("svg > *").remove();
                 
-                var [data_word,data_count,data_users,remaining_users] = getTopData();
+                listOfUsers = [];
+                listOfHashtags = [];
+                final_data = []
 
-                var topRelations = getRelations(data,month,remaining_users);
+                d3.text(input_file, function(data) {
+                        
+                    var [data_word,data_count,data_users,remaining_users,rank,topRelations] = dataParser(data);
+                    console.log("Parsing finished");
+                    
+                    //Map the data onto the visualization
+                    mapWords(data_word,w,h);
+                    [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
+                    mapRelations(topRelations,usersIndexes,userLocations);
+                    createCircles(userLocations,usersIndexes,rank);
+
+                    restElems();
+                    console.log("helooy!!");
+
+                });
                 
-                mapWords(data_word,w,h);
-                [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
-                createCircles(userLocations,usersIndexes);
-                mapRelations(topRelations,usersIndexes,userLocations);
-
-                return month;                       
+                return month;
+                //month = loadDataCreateViz(input_file); 
+                //svg = d3.select("body").transition();
             }
         }
 
