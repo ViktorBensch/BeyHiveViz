@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <link rel="stylesheet" type="text/css" href="KindaBlack.css"></link>
 
-        <title>Demo</title>
+        <title>Visualization Beyonce Fanbase</title>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
 		<script type="text/javascript" src="d3/d3.v3.js"></script>
         <style type="text/css">
@@ -17,6 +17,10 @@
     <body>
         <script type="text/javascript">
 		
+        var month_list = {9: 'sept_whole_month.txt',10: 'oct_whole_month.txt',11: 'nov_whole_month.txt',12: 'dec_whole_month.txt', 13: 'jan_whole_month.txt'};
+        var month = 12;
+        var input_file = month_list[month];
+
         var listOfUsers = [];
         var listOfHashtags = [];
         var final_data = []
@@ -28,7 +32,6 @@
         //FIX THIS LATER!!
         var breakUpList = {10:{},11:{}};
 
-        var month = 10
         var tooltip = d3.select("body")
             .append("div")
             .style("position", "absolute")
@@ -40,7 +43,7 @@
             .append("svg")
             .attr("width", w)
             .attr("height", h);
-        
+
         //****************UTILITY FUNCTIONS****************//
 		//used to count occurences inside the given array, returns an object		
 		function counter(cArray){
@@ -69,10 +72,10 @@
             }
             return -1;   // Not found
         }
+               
         //**************************************************//
         
         //*****************VISUALISATION FUNCTIONS**********//
-        
         //parse file
         function preprocessing(data){
             var array = data.split("\n");
@@ -375,7 +378,7 @@
                     }else{
                         wordClickList.push(d3.select(this).text());
                     }
-                })
+                });
         }
         
         //Place the users in the correct location in the svg
@@ -394,8 +397,6 @@
                 wordY = cy + radius*Math.sin(i/words.length*Math.PI*2);
                 word_coordinates.push([wordX,wordY]);
             }
-            
-            console.log('heloy');
             
             for(j= 0; j<users.length;j++){
             //for every word
@@ -550,7 +551,7 @@
                     var ui = userIndexes.indexOf(d[0]);
                     if(ui != -1){
                         var y1 = userLocations[ui].y;
-                        console.log('y1/',i,': ',y1);
+                        //console.log('y1/',i,': ',y1);
                         return y1;
                     }
                     else{return 0;}
@@ -572,9 +573,9 @@
         }
         //************************************************//
         
-        d3.text("DEC_whole_month.txt", function(data) {
-        //****************READ DATA****************//
-        
+
+        d3.text(input_file, function(data) {
+                
             preprocessing(data);
             console.log("Preprocessing finished");
             
@@ -587,13 +588,12 @@
             var [data_word,data_count,data_users,remaining_users] = getTopData();
 
             var topRelations = getRelations(data,month,remaining_users);
-            //console.log('relations', topRelations);
+            
             //Map the data onto the visualization
-
             mapWords(data_word,w,h);
             [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
-            createCircles(userLocations,usersIndexes);
             mapRelations(topRelations,usersIndexes,userLocations);
+            createCircles(userLocations,usersIndexes);
 
             restElems();
 
@@ -604,42 +604,63 @@
                   case 37: month -= 1; break;
                   case 39: month += 1; break;
                 }
-                month = update(data,month);
+                month = update(13);
             }); 
-            
-         
 
         });
         
+        
+        
         //Create additional update that puts user-word groups together
-        function update(data,month){
+        function update(month=13){
             //Range of data hard-coded. FIX THIS LATER!!
-            if(month > 11){
-                month = 11;
+            if(month > 13){
+                month = 13;
                 return month;
             }
-            else if ( month< 10){
-                month = 10;
+            else if (month< 9){
+                month = 9;
                 return month;
             }
             else{
+                input_file = month_list[month]; 
+                
                 //Remove old elements
-                svg.selectAll('text').remove();
-                svg.selectAll('circle').remove();
-                svg.selectAll('line').remove();
-
-                restElems();
+                d3.selectAll("svg > *").remove();
                 
-                var [data_word,data_count,data_users,remaining_users] = getTopData();
+                listOfUsers = [];
+                listOfHashtags = [];
+                final_data = []
 
-                var topRelations = getRelations(data,month,remaining_users);
+                d3.text(input_file, function(data) {
+                        
+                    preprocessing(data);
+                    console.log("Preprocessing finished2");
+                    
+                    /*
+                    VISUALISATION PART
+                    */
+
+                    //return array len3: [ name,count,[[users],[],...],[remaining_users,...]]
+                    //returns also the reminder users that were left in the system after the elimination of some words
+                    var [data_word,data_count,data_users,remaining_users] = getTopData();
+
+                    var topRelations = getRelations(data,month,remaining_users);
+                    
+                    //Map the data onto the visualization
+                    mapWords(data_word,w,h);
+                    [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
+                    mapRelations(topRelations,usersIndexes,userLocations);
+                    createCircles(userLocations,usersIndexes);
+
+                    restElems();
+                    console.log("helooy!!");
+
+                });
                 
-                mapWords(data_word,w,h);
-                [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
-                createCircles(userLocations,usersIndexes);
-                mapRelations(topRelations,usersIndexes,userLocations);
-
-                return month;                       
+                return month;
+                //month = loadDataCreateViz(input_file); 
+                //svg = d3.select("body").transition();
             }
         }
 
