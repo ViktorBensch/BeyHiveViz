@@ -7,6 +7,7 @@
         <title>Visualization Beyonce Fanbase</title>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
 		<script type="text/javascript" src="d3/d3.v3.js"></script>
+		<script type="text/javascript" src="createSideCharts.js"></script>
         <style type="text/css">
 .node text {
   pointer-events: none;
@@ -547,8 +548,9 @@
                 })
                 .attr('stroke-width',0.5);                        
         }
+		
+		
         //************************************************//
-        
         function dataParser(data){
             var data_w = [];
             var data_c = [];
@@ -600,6 +602,7 @@
             [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
             mapRelations(topRelations,usersIndexes,userLocations);
             createCircles(userLocations,usersIndexes,rank);
+			createSideCharts(data_word,data_count);
 
             restElems();
 
@@ -624,7 +627,8 @@
             [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
             mapRelations(topRelations,usersIndexes,userLocations);
             createCircles(userLocations,usersIndexes,rank);
-
+			createSideCharts(data_word,data_count);
+			
             restElems();
         }
         
@@ -659,6 +663,7 @@
                     [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
                     mapRelations(topRelations,usersIndexes,userLocations);
                     createCircles(userLocations,usersIndexes,rank);
+					createSideCharts(data_word,data_count);
 
                     restElems();
                     console.log("helooy!!");
