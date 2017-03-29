@@ -2,8 +2,8 @@ import shutil
 import glob
 import os
 
-root = "D:/Misra/output_january/"
-outfilename = "whole_month.json"
+root = "/Users/Kellie/output/"
+outfilename = "sept_whole_month.json"
 with open(outfilename, 'wb') as outfile:
     for path, subdirs, files in os.walk(root):
         for filename in files:
