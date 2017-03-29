@@ -351,26 +351,46 @@
                         //Check if the combination isn't already present in database, if not: add
                         console.log('words',data_word);
                         console.log('index', data_word.indexOf(naming));
+
                         //if(data[month].words.indexOf(naming)<0 && wordClickList.length>0){
-                        if( data_word.indexOf(naming) === -1 && wordClickList.length > 0 ){
+                        if( data_word.indexOf(naming) === -1 && wordClickList.length ===2 ){
                             data_word.push(naming);
 
+                            usersOfWordClickList = [];
                             //remove added element from origal word-array and user-array
                             for (var i = 0; i < wordClickList.length; i++) {
+                                console.log('rm word index',data_word.indexOf(wordClickList[i]))
+
+                                //Add users to new word-group
+                                indexUser = data_word.indexOf(wordClickList[i]);
 
                                 data_word.splice(data_word.indexOf(wordClickList[i]),1);
+
+                                console.log('idUser',indexUser,'userOfWord',data_users[indexUser])
+                                usersOfWordClickList = usersOfWordClickList.concat(data_users[indexUser]);
+                                data_users.splice(indexUser,1);
                                 //data[month].users.splice(data[month].users.indexOf(userGroup),1)
                             }
-                            console.log(data_word);
-                            svg.selectAll('text.groups').remove();
+                            //Add new user data
+                            data_users.push(usersOfWordClickList);
+                            console.log(data_word.length,'wordList',data_word);
+                            console.log(data_users.length,'wordList',data_users);
 
-                            /*Update suite */
+                            svg.selectAll('text.groups').remove();
+                            svg.selectAll('image').remove();
+                            svg.selectAll('line').remove();
+
+                            //Needed?
+                            var topRelations = getRelations(data,month,remaining_users);
+                           /*Updates */
                             mapWords(data_word,w,h);
 
                             //HOW TO DO USER-MAPPING IN NEW MODEL?
-                            // [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
-                            // createCircles(userLocations,usersIndexes);
-                            // mapRelations(topRelations,usersIndexes,userLocations);
+                            [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
+                            console.log('step1')
+                            createCircles(userLocations,usersIndexes);
+                            console.log('step2')
+                            mapRelations(topRelations,usersIndexes,userLocations);
 
                         //If the word is not 
                         }else if (naming.split(' & ')>wordClickList){
@@ -380,8 +400,8 @@
                                 data_word.push(names[i])
                             }
                             console.log("You're tearing me apart Lisa!")
-                            svg.selectAll('text.groups').remove();
-                            mapWords(data_word,w,h);
+                            //svg.selectAll('text.groups').remove();
+                            //mapWords(data_word,w,h);
 
 
                         }
@@ -445,8 +465,8 @@
                         }else{
                             wordClickList.push(d3.select(this).text());
                             if (wordClickList.length >1){
-                                console.log('Ready to merge!')
-                                d3.select(svg.title.text('Merge'));
+                                console.log('Ready to merge!', wordClickList)
+                                //d3.select(svg.title.text('Merge'));
                             }
                         }
                     })
@@ -480,9 +500,7 @@
                         if(userIndexDict.indexOf(users[j][k]) == -1){
                             for(word_place = 0; word_place<words.length; word_place++){
                                 if(users[word_place].indexOf(users[j][k]) != -1)
-                                {
-                                    
-                                    //add x value to x sum
+                                {                                    //add x value to x sum
                                     userXsum = userXsum + word_coordinates[word_place][0];
                                     //add y value to y sum
                                     userYsum = userYsum + word_coordinates[word_place][1];
