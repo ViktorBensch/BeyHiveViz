@@ -32,6 +32,12 @@
                style="height:30px;width:200px"/>
         </div>
         
+        <div id="option">
+        <form action="tutorial.html">
+        <input type="submit" value="back to tutorial" style="height:30px;width:200px"/>
+        </form>
+        </div>
+        
         
         <script type="text/javascript">
 		
@@ -45,6 +51,7 @@
         var rank = [];
         var topRelations = [];
         var month_header = "";
+        var month_label = "";
         
         var w = 1200;
         var h = 1200;
@@ -634,6 +641,14 @@
             console.log("resetting");
             d3.selectAll("svg > *").remove();
             
+            month_header = svg.append("text")
+                       .text(month_label)
+                       .attr("x", 60)
+                       .attr("y", 60)
+                       .attr("font-family", "sans-serif")
+                       .attr("font-size", "30px")
+                       .attr("fill", "white");   
+            
             mapWords(data_word,w,h);
             [userLocations, usersIndexes] = mapUsers(data_word,data_users,w,h);
             mapRelations(topRelations,usersIndexes,userLocations);
@@ -656,15 +671,14 @@
             }
             else{
                 input_file = month_list[month]; 
-                var text = "";
                 if(month == 10){
-                    text = "October, 2016";
+                    month_label = "October, 2016";
                 }else if(month == 11){
-                    text = "November, 2016";
+                    month_label = "November, 2016";
                 }else if(month == 12){
-                    text = "December, 2016";
+                    month_label = "December, 2016";
                 }else if(13){
-                    text = "January, 2017";
+                    month_label = "January, 2017";
                 }
                 
                 //Remove old elements
@@ -677,7 +691,7 @@
                 d3.text(input_file, function(data) {
                     
                     month_header = svg.append("text")
-                       .text(text)
+                       .text(month_label)
                        .attr("x", 60)
                        .attr("y", 60)
                        .attr("font-family", "sans-serif")
